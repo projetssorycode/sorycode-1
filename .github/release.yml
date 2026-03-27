@@ -1,0 +1,18 @@
+changelog:
+  categories:
+    - title: CLI
+      labels:
+        - cli
+    - title: Desktop
+      labels:
+        - desktop
+    - title: Documentation
+      labels:
+        - docs
+    - title: Fixes
+      labels:
+        - bug
+        - fix
+    - title: Other changes
+      labels:
+        - "*"

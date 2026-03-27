@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: SoryCode releases
+    url: https://github.com/projetssorycode/sorycode-1/releases
+    about: Check released binaries and changelogs before opening an issue.
+

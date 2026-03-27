@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem with SoryCode
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the problem and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include exact commands, inputs, or actions.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Include OS, install method, and version.
+      placeholder: |
+        OS:
+        Install method:
+        Version:
+    validations:
+      required: true
+
