@@ -1,0 +1,599 @@
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+CLI SoryCode domyślnie uruchamia [TUI](/docs/tui), gdy wywołasz je bez argumentów.
+
+```bash
+sorycode
+```
+
+CLI obsługuje też polecenia opisane na tej stronie, więc możesz używać SoryCode programowo.
+
+```bash
+sorycode run "Explain how closures work in JavaScript"
+```
+
+---
+
+### tui
+
+Uruchamia interfejs terminalowy (TUI) SoryCode.
+
+```bash
+sorycode [project]
+```
+
+#### Flagi
+
+| Flaga        | Skrót | Opis                                                                    |
+| ------------ | ----- | ----------------------------------------------------------------------- |
+| `--continue` | `-c`  | Kontynuuj ostatnią sesję                                                |
+| `--session`  | `-s`  | Identyfikator sesji do kontynuowania                                    |
+| `--fork`     |       | Sklonuj sesję podczas kontynuacji (użyj z `--continue` lub `--session`) |
+| `--prompt`   |       | Monit do użycia                                                         |
+| `--model`    | `-m`  | Model do użycia w formacie dostawca/model                               |
+| `--agent`    |       | Agent do użycia                                                         |
+| `--port`     |       | Port do nasłuchiwania                                                   |
+| `--hostname` |       | Nazwa hosta, do której należy się powiązać                              |
+
+---
+
+## Polecenia
+
+Interfejs CLI SoryCode zawiera także dodatkowe polecenia.
+
+---
+
+### agent
+
+Zarządzaj agentami SoryCode.
+
+```bash
+sorycode agent [command]
+```
+
+---
+
+### attach
+
+Dołącz terminal do już działającego serwera backendu SoryCode uruchomionego za pomocą `serve` lub `web`.
+
+```bash
+sorycode attach [url]
+```
+
+Pozwala to połączyć TUI ze zdalnym backendem SoryCode. Na przykład:
+
+```bash
+# Start the backend server for web/mobile access
+sorycode web --port 4096 --hostname 0.0.0.0
+
+# In another terminal, attach the TUI to the running backend
+sorycode attach http://10.20.30.40:4096
+```
+
+#### Flagi
+
+| Flaga       | Skrót | Opis                                    |
+| ----------- | ----- | --------------------------------------- |
+| `--dir`     |       | Katalog roboczy, w którym uruchomić TUI |
+| `--session` | `-s`  | Identyfikator sesji do kontynuowania    |
+
+---
+
+#### create
+
+Utwórz nowego agenta z niestandardową konfiguracją.
+
+```bash
+sorycode agent create
+```
+
+To polecenie poprowadzi Cię przez proces tworzenia nowego agenta z niestandardowym promptem systemowym i konfiguracją narzędzi.
+
+---
+
+#### list
+
+Wyświetl listę wszystkich agentów.
+
+```bash
+sorycode agent list
+```
+
+---
+
+### auth
+
+Zarządzaj danymi uwierzytelniającymi i logowaniem dla dostawców.
+
+```bash
+sorycode auth [command]
+```
+
+---
+
+#### login
+
+SoryCode integruje się z wieloma dostawcami. Możesz użyć `sorycode auth login`, aby skonfigurować klucz API dla dowolnego obsługiwanego dostawcy. Klucze są bezpiecznie przechowywane w `~/.local/share/sorycode/auth.json`.
+
+```bash
+sorycode auth login
+```
+
+Podczas uruchamiania SoryCode ładuje dostawców z pliku poświadczeń, a także ze zmiennych środowiskowych lub pliku `.env` w Twoim projekcie.
+
+---
+
+#### list
+
+Wyświetl listę wszystkich uwierzytelnionych dostawców przechowywanych w pliku poświadczeń.
+
+```bash
+sorycode auth list
+```
+
+Lub skrócona wersja:
+
+```bash
+sorycode auth ls
+```
+
+---
+
+#### logout
+
+Wyloguj się z dostawcy, usuwając go z pliku poświadczeń.
+
+```bash
+sorycode auth logout
+```
+
+---
+
+### github
+
+Zarządzaj agentem GitHub w celu automatyzacji repozytorium.
+
+```bash
+sorycode github [command]
+```
+
+---
+
+#### install
+
+Zainstaluj agenta GitHub w swoim repozytorium.
+
+```bash
+sorycode github install
+```
+
+Spowoduje to utworzenie pliku workflow GitHub Actions i poprowadzi Cię przez proces konfiguracji. [Dowiedz się więcej](/docs/github).
+
+---
+
+#### run
+
+Uruchom agenta na GitHubie. Zwykle używane w GitHub Actions.
+
+```bash
+sorycode github run
+```
+
+##### Flagi
+
+| Flaga     | Opis                                     |
+| --------- | ---------------------------------------- |
+| `--event` | Zdarzenie GitHub, które wyzwoliło agenta |
+| `--token` | Osobisty token dostępu GitHub            |
+
+---
+
+### mcp
+
+Zarządzaj serwerami Model Context Protocol (MCP).
+
+```bash
+sorycode mcp [command]
+```
+
+---
+
+#### add
+
+Dodaj serwer MCP do swojej konfiguracji.
+
+```bash
+sorycode mcp add
+```
+
+To polecenie poprowadzi Cię przez proces dodawania lokalnego lub zdalnego serwera MCP.
+
+---
+
+#### list
+
+Wyświetl listę wszystkich skonfigurowanych serwerów MCP i ich status.
+
+```bash
+sorycode mcp list
+```
+
+Lub skrócona wersja:
+
+```bash
+sorycode mcp ls
+```
+
+---
+
+#### auth
+
+Uwierzytelnij się w serwerze MCP z włączoną funkcją OAuth.
+
+```bash
+sorycode mcp auth [name]
+```
+
+Jeśli nie podasz nazwy serwera, zostaniesz poproszony o wybranie jednego z serwerów wymagających uwierzytelnienia.
+
+Możesz także wyświetlić listę serwerów obsługujących OAuth i ich status uwierzytelnienia.
+
+```bash
+sorycode mcp auth list
+```
+
+Lub skrócona wersja:
+
+```bash
+sorycode mcp auth ls
+```
+
+---
+
+#### logout
+
+Usuń tokeny OAuth dla serwera MCP.
+
+```bash
+sorycode mcp logout [name]
+```
+
+---
+
+#### debug
+
+Debuguj problemy z połączeniem OAuth dla serwera MCP.
+
+```bash
+sorycode mcp debug <name>
+```
+
+---
+
+### models
+
+Wyświetl listę modeli ze wszystkich skonfigurowanych dostawców.
+
+```bash
+sorycode models [provider]
+```
+
+Pokazuje modele dostępne do użycia w `provider/model`.
+
+Jest to identyfikator modelu, którego używasz w [konfiguracji](/docs/config).
+
+Opcjonalnie możesz podać identyfikator dostawcy, aby filtrować modele według tego dostawcy.
+
+```bash
+sorycode models anthropic
+```
+
+#### Flagi
+
+| Flaga       | Opis                                                                            |
+| ----------- | ------------------------------------------------------------------------------- |
+| `--refresh` | Odśwież pamięć podręczną modeli                                                 |
+| `--verbose` | Bardziej szczegółowe dane wyjściowe modelu (zawiera metadane, takie jak koszty) |
+
+Użyj flagi `--refresh`, aby zaktualizować listę modeli w pamięci podręcznej. Jest to przydatne, gdy dostawca dodał nowe modele, które chcesz zobaczyć w SoryCode.
+
+```bash
+sorycode models --refresh
+```
+
+---
+
+### run
+
+Uruchom SoryCode w trybie nieinteraktywnym, przekazując bezpośrednio prompt.
+
+```bash
+sorycode run [message..]
+```
+
+Jest to przydatne do tworzenia skryptów, automatyzacji lub gdy chcesz wysłać szybkie zapytanie bez uruchamiania TUI. Na przykład:
+
+```bash "sorycode run"
+sorycode run Explain the use of context in Go
+```
+
+Można również użyć tego z działającym `sorycode serve`, aby uniknąć zimnego startu serwera MCP przy każdym uruchomieniu:
+
+```bash
+# Start a headless server in one terminal
+sorycode serve
+
+# In another terminal, run commands that attach to it
+sorycode run --attach http://localhost:4096 "Explain async/await in JavaScript"
+```
+
+#### Flagi
+
+| Flaga        | Skrót | Opis                                                                    |
+| ------------ | ----- | ----------------------------------------------------------------------- |
+| `--command`  |       | Polecenie do uruchomienia, reszta to argumenty                          |
+| `--continue` | `-c`  | Kontynuuj ostatnią sesję                                                |
+| `--session`  | `-s`  | Identyfikator sesji do kontynuowania                                    |
+| `--fork`     |       | Sklonuj sesję podczas kontynuacji (użyj z `--continue` lub `--session`) |
+| `--share`    |       | Udostępnij sesję po zakończeniu                                         |
+| `--model`    | `-m`  | Model do użycia w formacie dostawca/model                               |
+| `--agent`    |       | Agent do użycia                                                         |
+| `--file`     | `-f`  | Pliki do załączenia do wiadomości                                       |
+| `--format`   |       | Format wyjściowy: `default` (sformatowany) lub `json` (surowy JSON)     |
+| `--title`    |       | Tytuł sesji (jeśli nie podano, zostanie wygenerowany z promptu)         |
+| `--attach`   |       | Dołącz do działającego serwera SoryCode (np. http://localhost:4096)     |
+| `--port`     |       | Port dla serwera lokalnego (domyślnie losowy)                           |
+
+---
+
+### serve
+
+Uruchom serwer SoryCode (bez interfejsu) w celu uzyskania dostępu do API. Pełny opis API HTTP znajduje się w [dokumentacji serwera](/docs/server).
+
+```bash
+sorycode serve
+```
+
+Uruchamia to serwer HTTP, który zapewnia dostęp do API SoryCode bez interfejsu TUI. Ustaw `SORYCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `sorycode`).
+
+#### Flagi
+
+| Flaga        | Opis                                       |
+| ------------ | ------------------------------------------ |
+| `--port`     | Port do nasłuchiwania                      |
+| `--hostname` | Nazwa hosta, do której należy się powiązać |
+| `--mdns`     | Włącz wykrywanie mDNS                      |
+| `--cors`     | Dodatkowe dozwolone źródła CORS            |
+
+---
+
+### session
+
+Zarządzaj sesjami SoryCode.
+
+```bash
+sorycode session [command]
+```
+
+---
+
+#### list
+
+Lista wszystkich sesji SoryCode.
+
+```bash
+sorycode session list
+```
+
+##### Flagi
+
+| Flaga         | Skrót | Opis                                       |
+| ------------- | ----- | ------------------------------------------ |
+| `--max-count` | `-n`  | Ogranicz do ostatnich N sesji              |
+| `--format`    |       | Format wyjściowy: tabela lub json (tabela) |
+
+---
+
+### stats
+
+Pokaż statystyki wykorzystania tokenów i sesji SoryCode.
+
+```bash
+sorycode stats
+```
+
+#### Flagi
+
+| Flaga       | Opis                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------- |
+| `--days`    | Pokaż statystyki z ostatnich N dni (domyślnie: cały czas)                             |
+| `--tools`   | Pokaż użycie poszczególnych narzędzi (domyślnie: wszystkie)                           |
+| `--models`  | Pokaż podział na modele (domyślnie ukryty). Podaj liczbę, aby pokazać N najczęstszych |
+| `--project` | Filtruj według projektu (domyślnie: wszystkie projekty, pusty ciąg: bieżący projekt)  |
+
+---
+
+### export
+
+Eksportuj dane sesji jako JSON.
+
+```bash
+sorycode export [sessionID]
+```
+
+Jeśli nie podasz identyfikatora sesji, zostaniesz poproszony o wybranie jednej z ostatnich sesji.
+
+---
+
+### import
+
+Importuj dane sesji z pliku JSON lub adresu URL udostępniania SoryCode.
+
+```bash
+sorycode import <file>
+```
+
+Możesz importować z pliku lokalnego lub adresu URL.
+
+```bash
+sorycode import session.json
+sorycode import https://opncd.ai/s/abc123
+```
+
+---
+
+### web
+
+Uruchom serwer SoryCode z interfejsem internetowym.
+
+```bash
+sorycode web
+```
+
+Uruchamia to serwer HTTP i udostępnia SoryCode przez interfejs przeglądarkowy. Ustaw `SORYCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `sorycode`).
+
+#### Flagi
+
+| Flaga        | Opis                                       |
+| ------------ | ------------------------------------------ |
+| `--port`     | Port do nasłuchiwania                      |
+| `--hostname` | Nazwa hosta, do której należy się powiązać |
+| `--mdns`     | Włącz wykrywanie mDNS                      |
+| `--cors`     | Dodatkowe dozwolone źródła CORS            |
+
+---
+
+### acp
+
+Uruchom serwer ACP (Agent Client Protocol).
+
+```bash
+sorycode acp
+```
+
+Uruchamia serwer ACP, który komunikuje się przez stdin/stdout przy użyciu JSON-RPC.
+
+#### Flagi
+
+| Flaga        | Opis                                       |
+| ------------ | ------------------------------------------ |
+| `--cwd`      | Katalog roboczy                            |
+| `--port`     | Port do nasłuchiwania                      |
+| `--hostname` | Nazwa hosta, do której należy się powiązać |
+
+---
+
+### uninstall
+
+Odinstaluj SoryCode i usuń wszystkie powiązane pliki.
+
+```bash
+sorycode uninstall
+```
+
+#### Flagi
+
+| Flaga           | Skrót | Opis                          |
+| --------------- | ----- | ----------------------------- |
+| `--keep-config` | `-c`  | Zachowaj pliki konfiguracyjne |
+| `--keep-data`   | `-d`  | Zachowaj dane sesji i migawki |
+| `--dry-run`     |       | Pokaż co zostanie usunięte    |
+| `--force`       | `-f`  | Pomiń monity o potwierdzenie  |
+
+---
+
+### upgrade
+
+Aktualizuj SoryCode do najnowszej lub określonej wersji.
+
+```bash
+sorycode upgrade [target]
+```
+
+Aby zaktualizować do najnowszej wersji:
+
+```bash
+sorycode upgrade
+```
+
+Aby zaktualizować do konkretnej wersji:
+
+```bash
+sorycode upgrade v0.1.48
+```
+
+#### Flagi
+
+| Flaga      | Skrót | Opis                                                |
+| ---------- | ----- | --------------------------------------------------- |
+| `--method` | `-m`  | Wymuś metodę instalacji: curl, npm, pnpm, bun, brew |
+
+---
+
+## Flagi globalne
+
+Interfejs CLI SoryCode przyjmuje następujące flagi globalne dla każdego polecenia.
+
+| Flaga          | Skrót | Opis                                        |
+| -------------- | ----- | ------------------------------------------- |
+| `--help`       | `-h`  | Wyświetl pomoc                              |
+| `--version`    | `-v`  | Wydrukuj numer wersji                       |
+| `--print-logs` |       | Drukuj logi na stderr                       |
+| `--log-level`  |       | Poziom logowania (DEBUG, INFO, WARN, ERROR) |
+
+---
+
+## Zmienne środowiskowe
+
+SoryCode można skonfigurować za pomocą zmiennych środowiskowych.
+
+| Zmienna                               | Typ     | Opis                                                        |
+| ------------------------------------- | ------- | ----------------------------------------------------------- |
+| `SORYCODE_AUTO_SHARE`                 | boolean | Automatycznie udostępniaj sesje                             |
+| `SORYCODE_GIT_BASH_PATH`              | string  | Ścieżka do pliku wykonywalnego Git Bash w systemie Windows  |
+| `SORYCODE_CONFIG`                     | string  | Ścieżka do pliku konfiguracyjnego                           |
+| `SORYCODE_TUI_CONFIG`                 | string  | Ścieżka do pliku konfiguracyjnego TUI                       |
+| `SORYCODE_CONFIG_DIR`                 | string  | Ścieżka do katalogu konfiguracyjnego                        |
+| `SORYCODE_CONFIG_CONTENT`             | string  | Treść konfiguracji JSON (inline)                            |
+| `SORYCODE_DISABLE_AUTOUPDATE`         | boolean | Wyłącz automatyczne sprawdzanie aktualizacji                |
+| `SORYCODE_DISABLE_PRUNE`              | boolean | Wyłącz czyszczenie starych wyników (pruning)                |
+| `SORYCODE_DISABLE_TERMINAL_TITLE`     | boolean | Wyłącz automatyczne ustawianie tytułu terminala             |
+| `SORYCODE_PERMISSION`                 | string  | Konfiguracja uprawnień w JSON (inline)                      |
+| `SORYCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Wyłącz domyślne wtyczki                                     |
+| `SORYCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Wyłącz automatyczne pobieranie serwerów LSP                 |
+| `SORYCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Włącz modele eksperymentalne                                |
+| `SORYCODE_DISABLE_AUTOCOMPACT`        | boolean | Wyłącz automatyczne kompaktowanie kontekstu                 |
+| `SORYCODE_DISABLE_CLAUDE_CODE`        | boolean | Wyłącz integrację z `.claude` (prompt + skills)             |
+| `SORYCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Wyłącz czytanie `~/.claude/CLAUDE.md`                       |
+| `SORYCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Wyłącz ładowanie `.claude/skills`                           |
+| `SORYCODE_DISABLE_MODELS_FETCH`       | boolean | Wyłącz pobieranie modeli ze źródeł zewnętrznych             |
+| `SORYCODE_FAKE_VCS`                   | string  | Fałszywy dostawca VCS do celów testowych                    |
+| `SORYCODE_DISABLE_FILETIME_CHECK`     | boolean | Wyłącz sprawdzanie czasu modyfikacji plików (optymalizacja) |
+| `SORYCODE_CLIENT`                     | string  | Identyfikator klienta (domyślnie `cli`)                     |
+| `SORYCODE_ENABLE_EXA`                 | boolean | Włącz narzędzie wyszukiwania internetowego Exa              |
+| `SORYCODE_SERVER_PASSWORD`            | string  | Włącz uwierzytelnianie podstawowe dla `serve`/`web`         |
+| `SORYCODE_SERVER_USERNAME`            | string  | Nazwa użytkownika do autoryzacji (domyślnie `sorycode`)     |
+| `SORYCODE_MODELS_URL`                 | string  | Niestandardowy adres URL do pobierania konfiguracji modeli  |
+
+---
+
+### Eksperymentalne
+
+Te zmienne włączają funkcje eksperymentalne, które mogą ulec zmianie lub zostać usunięte.
+
+| Zmienna                                         | Typ     | Opis                                         |
+| ----------------------------------------------- | ------- | -------------------------------------------- |
+| `SORYCODE_EXPERIMENTAL`                         | boolean | Włącz wszystkie funkcje eksperymentalne      |
+| `SORYCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Włącz wykrywanie ikon                        |
+| `SORYCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Wyłącz kopiowanie przy zaznaczaniu w TUI     |
+| `SORYCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Domyślny limit czasu dla narzędzia bash w ms |
+| `SORYCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Maksymalne tokeny wyjściowe dla LLM          |
+| `SORYCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Włącz obserwatora plików dla całego katalogu |
+| `SORYCODE_EXPERIMENTAL_OXFMT`                   | boolean | Włącz formater oxfmt                         |
+| `SORYCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Włącz eksperymentalne narzędzie LSP          |
+| `SORYCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Wyłącz obserwatora plików                    |
+| `SORYCODE_EXPERIMENTAL_EXA`                     | boolean | Włącz funkcje eksperymentalne Exa            |
+| `SORYCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Włącz eksperymentalne sprawdzanie typów LSP  |
+| `SORYCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Włącz funkcje eksperymentalne Markdown       |
+| `SORYCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Włącz tryb planowania                        |

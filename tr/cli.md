@@ -1,0 +1,599 @@
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+sorycode CLI herhangi bir argüman olmadan çalıştırıldığında varsayılan olarak [TUI](/docs/tui)'yi başlatır.
+
+```bash
+sorycode
+```
+
+Ancak bu sayfada belgelendiği gibi komutları da kabul eder. Bu, sorycode ile programlı olarak etkileşim kurmanıza olanak tanır.
+
+```bash
+sorycode run "Explain how closures work in JavaScript"
+```
+
+---
+
+### tui
+
+sorycode terminal kullanıcı arayüzünü başlatır.
+
+```bash
+sorycode [project]
+```
+
+#### Bayraklar
+
+| Bayrak       | Kısa | Açıklama                                                                    |
+| ------------ | ---- | --------------------------------------------------------------------------- |
+| `--continue` | `-c` | Son oturuma devam et                                                        |
+| `--session`  | `-s` | Devam edecek oturum kimliği                                                 |
+| `--fork`     |      | Devam ederken oturumu fork'lar (`--continue` veya `--session` ile kullanın) |
+| `--prompt`   |      | Kullanılacak prompt                                                         |
+| `--model`    | `-m` | provider/model biçiminde kullanılacak model                                 |
+| `--agent`    |      | Kullanılacak agent                                                          |
+| `--port`     |      | Dinlenecek port                                                             |
+| `--hostname` |      | Dinlenecek host adı                                                         |
+
+---
+
+## Komutlar
+
+sorycode CLI ayrıca aşağıdaki komutlara da sahiptir.
+
+---
+
+### agent
+
+sorycode için agent'ları yönetin.
+
+```bash
+sorycode agent [command]
+```
+
+---
+
+### attach
+
+`serve` veya `web` komutlarıyla başlatılan, halihazırda çalışan bir sorycode arka uç sunucusuna bir terminal ekleyin.
+
+```bash
+sorycode attach [url]
+```
+
+Bu, TUI öğesinin uzak bir sorycode arka ucuyla kullanılmasına olanak tanır. Örneğin:
+
+```bash
+# Start the backend server for web/mobile access
+sorycode web --port 4096 --hostname 0.0.0.0
+
+# In another terminal, attach the TUI to the running backend
+sorycode attach http://10.20.30.40:4096
+```
+
+#### Bayraklar
+
+| Bayrak      | Kısa | Tanım                                |
+| ----------- | ---- | ------------------------------------ |
+| `--dir`     |      | TUI'yi başlatmak için çalışma dizini |
+| `--session` | `-s` | Devam edecek oturum açma bilgileri   |
+
+---
+
+#### create
+
+Özel yapılandırmaya sahip yeni bir agent oluşturun.
+
+```bash
+sorycode agent create
+```
+
+Bu komut, özel sistem istemi ve araç yapılandırmasıyla yeni bir agent oluşturma konusunda size yol gösterecektir.
+
+---
+
+#### list
+
+Mevcut tüm agent'ları listeleyin.
+
+```bash
+sorycode agent list
+```
+
+---
+
+### auth
+
+Sağlayıcılar için kimlik bilgilerini ve oturum açmayı yönetme komutu.
+
+```bash
+sorycode auth [command]
+```
+
+---
+
+#### login
+
+sorycode, [Models.dev](https://models.dev) adresindeki sağlayıcı listesi tarafından desteklenmektedir, dolayısıyla kullanmak istediğiniz herhangi bir sağlayıcı için API anahtarlarını ayarlamak üzere `sorycode auth login` kullanabilirsiniz. Bu `~/.local/share/sorycode/auth.json`'de saklanıyor.
+
+```bash
+sorycode auth login
+```
+
+sorycode başlatıldığında sağlayıcıları kimlik bilgileri dosyasından yükler. Ayrıca ortam değişkenlerindeki veya projenizdeki `.env` dosyasındaki anahtarları da kullanır.
+
+---
+
+#### list
+
+Kimlik bilgileri dosyasında depolanan tüm kimliği doğrulanmış sağlayıcıları listeler.
+
+```bash
+sorycode auth list
+```
+
+Veya kısa versiyonu.
+
+```bash
+sorycode auth ls
+```
+
+---
+
+#### logout
+
+Bir sağlayıcıyı kimlik bilgileri dosyasından temizleyerek oturumunuzu kapatır.
+
+```bash
+sorycode auth logout
+```
+
+---
+
+### github
+
+Depo otomasyonu için GitHub aracısını yönetin.
+
+```bash
+sorycode github [command]
+```
+
+---
+
+#### install
+
+GitHub aracısını deponuza yükleyin.
+
+```bash
+sorycode github install
+```
+
+Bu komut gerekli GitHub Actions workflow'unu kurar ve yapılandırma adımlarında size rehberlik eder. [Daha fazla bilgi](/docs/github).
+
+---
+
+#### run
+
+GitHub aracısını çalıştırın. Bu genellikle GitHub Eylemlerinde kullanılır.
+
+```bash
+sorycode github run
+```
+
+##### Bayraklar
+
+| Bayrak    | Açıklama                                    |
+| --------- | ------------------------------------------- |
+| `--event` | Aracıyı çalıştırmak için GitHub sahte olayı |
+| `--token` | GitHub personal access token                |
+
+---
+
+### mcp
+
+Model Bağlam Protokolü sunucularını yönetin.
+
+```bash
+sorycode mcp [command]
+```
+
+---
+
+#### add
+
+Yapılandırmanıza bir MCP sunucusu ekleyin.
+
+```bash
+sorycode mcp add
+```
+
+Bu komut, yerel veya uzak bir MCP sunucusu ekleme konusunda size yol gösterecektir.
+
+---
+
+#### list
+
+Yapılandırılmış tüm MCP sunucularını ve bağlantı durumlarını listeleyin.
+
+```bash
+sorycode mcp list
+```
+
+Veya kısa versiyonunu kullanın.
+
+```bash
+sorycode mcp ls
+```
+
+---
+
+#### auth
+
+OAuth'un etkin olduğu bir MCP sunucusuyla kimlik doğrulaması yapın.
+
+```bash
+sorycode mcp auth [name]
+```
+
+Sunucu adı belirtmezseniz mevcut OAuth özellikli sunucular arasından seçim yapmanız istenir.
+
+Ayrıca OAuth özellikli sunucuları ve bunların kimlik doğrulama durumlarını da listeleyebilirsiniz.
+
+```bash
+sorycode mcp auth list
+```
+
+Veya kısa versiyonunu kullanın.
+
+```bash
+sorycode mcp auth ls
+```
+
+---
+
+#### logout
+
+MCP sunucusu için OAuth kimlik bilgilerini kaldırın.
+
+```bash
+sorycode mcp logout [name]
+```
+
+---
+
+#### debug
+
+MCP sunucusu için OAuth bağlantı sorunlarının hatalarını ayıklayın.
+
+```bash
+sorycode mcp debug <name>
+```
+
+---
+
+### models
+
+Yapılandırılmış sağlayıcıların tüm mevcut modellerini listeleyin.
+
+```bash
+sorycode models [provider]
+```
+
+Bu komut, yapılandırdığınız sağlayıcılardaki modelleri `provider/model` formatında listeler.
+
+Bu, [config dosyanızda](/docs/config/) kullanmanız gereken tam model adını bulmak için kullanışlıdır.
+
+Modelleri bu sağlayıcıya göre filtrelemek için isteğe bağlı olarak bir sağlayıcı kimliğini iletebilirsiniz.
+
+```bash
+sorycode models anthropic
+```
+
+#### Bayraklar
+
+| Bayrak      | Tanım                                                                       |
+| ----------- | --------------------------------------------------------------------------- |
+| `--refresh` | Modeller.dev'den model önbelleğini yenileyin                                |
+| `--verbose` | Daha ayrıntılı model çıktısı kullanın (maliyetler gibi meta veriler içerir) |
+
+Önbelleğe alınan model listesini güncellemek için `--refresh` bayrağını kullanın. Bu, bir sağlayıcıya yeni modeller eklendiğinde ve bunları sorycode'da görmek istediğinizde kullanışlıdır.
+
+```bash
+sorycode models --refresh
+```
+
+---
+
+### run
+
+Doğrudan bir istem ileterek sorycode'u etkileşimli olmayan modda çalıştırın.
+
+```bash
+sorycode run [message..]
+```
+
+Bu, komut dosyası oluşturma, otomasyon veya TUI'un tamamını başlatmadan hızlı bir yanıt istediğinizde kullanışlıdır. Örneğin.
+
+```bash "sorycode run"
+sorycode run Explain the use of context in Go
+```
+
+Ayrıca, her çalıştırmada MCP sunucusunun soğuk önyükleme sürelerini önlemek için çalışan bir `sorycode serve` örneğine de ekleyebilirsiniz:
+
+```bash
+# Start a headless server in one terminal
+sorycode serve
+
+# In another terminal, run commands that attach to it
+sorycode run --attach http://localhost:4096 "Explain async/await in JavaScript"
+```
+
+#### Bayraklar
+
+| Bayrak       | Kısa | Açıklama                                                                          |
+| ------------ | ---- | --------------------------------------------------------------------------------- |
+| `--command`  |      | Çalıştırılacak komut, args için mesajı kullanın                                   |
+| `--continue` | `-c` | Son oturuma devam et                                                              |
+| `--session`  | `-s` | Devam edecek oturum kimliği                                                       |
+| `--fork`     |      | Devam ederken oturumu fork'lar (`--continue` veya `--session` ile kullanın)       |
+| `--share`    |      | Oturumu paylaşın                                                                  |
+| `--model`    | `-m` | provider/model biçiminde kullanılacak model                                       |
+| `--agent`    |      | Kullanılacak temsilci                                                             |
+| `--file`     | `-f` | Mesaja eklenecek dosya(lar)                                                       |
+| `--format`   |      | Biçim: varsayılan (biçimlendirilmiş) veya json (ham JSON olayları)                |
+| `--title`    |      | Oturumun başlığı (değer sağlanmazsa kısaltılmış bilgi istemi kullanılır)          |
+| `--attach`   |      | Çalışan bir sorycode sunucusuna ekleyin (ör. http://localhost:4096)               |
+| `--port`     |      | Yerel sunucunun bağlantı noktası (varsayılan olarak rastgele bağlantı noktasıdır) |
+
+---
+
+### serve
+
+API erişimi için headless bir sorycode sunucusu başlatır. Tam HTTP arayüzü için [server docs](/docs/server) sayfasına bakın.
+
+```bash
+sorycode serve
+```
+
+Bu, TUI arayüzü olmadan sorycode işlevselliğine API erişimi sağlayan bir HTTP sunucusunu başlatır. HTTP temel kimlik doğrulamasını etkinleştirmek için `SORYCODE_SERVER_PASSWORD` öğesini ayarlayın (kullanıcı adı varsayılan olarak `sorycode` şeklindedir).
+
+#### Bayraklar
+
+| Bayrak       | Tanım                                      |
+| ------------ | ------------------------------------------ |
+| `--port`     | Dinlenecek bağlantı noktası                |
+| `--hostname` | Dinlenecek ana bilgisayar adı              |
+| `--mdns`     | mDNS bulmayı etkinleştir                   |
+| `--cors`     | CORS'a izin verecek ek tarayıcı kaynakları |
+
+---
+
+### session
+
+sorycode oturumlarını yönetin.
+
+```bash
+sorycode session [command]
+```
+
+---
+
+#### list
+
+Tüm sorycode oturumlarını listeleyin.
+
+```bash
+sorycode session list
+```
+
+##### Bayraklar
+
+| Bayrak        | Kısa | Tanım                                  |
+| ------------- | ---- | -------------------------------------- |
+| `--max-count` | `-n` | En son N oturumla sınırla              |
+| `--format`    |      | Çıkış formatı: tablo veya json (tablo) |
+
+---
+
+### stats
+
+sorycode oturumlarınız için belirteç kullanımı ve maliyet istatistiklerini gösterin.
+
+```bash
+sorycode stats
+```
+
+#### Bayraklar
+
+| Bayrak      | Açıklama                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `--days`    | Son N güne ait istatistikleri göster (tüm zamanlar)                                                         |
+| `--tools`   | Gösterilecek araç sayısı (tümü)                                                                             |
+| `--models`  | Model kullanım dökümünü göster (varsayılan olarak gizlidir). En üstteki N'yi göstermek için bir sayı iletin |
+| `--project` | Projeye göre filtrele (tüm projeler, boş değer: mevcut proje)                                               |
+
+---
+
+### export
+
+Oturum verilerini JSON olarak dışa aktarın.
+
+```bash
+sorycode export [sessionID]
+```
+
+Bir oturum kimliği sağlamazsanız mevcut oturumlar arasından seçim yapmanız istenir.
+
+---
+
+### import
+
+Bir JSON dosyasından veya sorycode paylaşımından URL oturum verilerini içe aktarın.
+
+```bash
+sorycode import <file>
+```
+
+Yerel bir dosyadan veya sorycode paylaşımından (URL) içe aktarabilirsiniz.
+
+```bash
+sorycode import session.json
+sorycode import https://opncd.ai/s/abc123
+```
+
+---
+
+### web
+
+Web arayüzüyle başsız bir sorycode sunucusu başlatın.
+
+```bash
+sorycode web
+```
+
+Bu, bir HTTP sunucusunu başlatır ve bir web arayüzü aracılığıyla sorycode'a erişmek için bir web tarayıcısı açar. HTTP temel kimlik doğrulamasını etkinleştirmek için `SORYCODE_SERVER_PASSWORD` öğesini ayarlayın (kullanıcı adı varsayılan olarak `sorycode` şeklindedir).
+
+#### Bayraklar
+
+| Bayrak       | Tanım                                      |
+| ------------ | ------------------------------------------ |
+| `--port`     | Dinlenecek bağlantı noktası                |
+| `--hostname` | Dinlenecek ana bilgisayar adı              |
+| `--mdns`     | mDNS bulmayı etkinleştir                   |
+| `--cors`     | CORS'a izin verecek ek tarayıcı kaynakları |
+
+---
+
+### acp
+
+Bir ACP (Ajan İstemci Protokolü) sunucusu başlatın.
+
+```bash
+sorycode acp
+```
+
+Bu komut, nd-JSON kullanarak stdin/stdout aracılığıyla iletişim kuran bir ACP sunucusunu başlatır.
+
+#### Bayraklar
+
+| Bayrak       | Açıklama            |
+| ------------ | ------------------- |
+| `--cwd`      | Çalışma dizini      |
+| `--port`     | Dinlenecek port     |
+| `--hostname` | Dinlenecek host adı |
+
+---
+
+### uninstall
+
+sorycode'u kaldırın ve ilgili tüm dosyaları kaldırın.
+
+```bash
+sorycode uninstall
+```
+
+#### Bayraklar
+
+| Bayrak          | Kısa | Tanım                                           |
+| --------------- | ---- | ----------------------------------------------- |
+| `--keep-config` | `-c` | Yapılandırma dosyalarını sakla                  |
+| `--keep-data`   | `-d` | Oturum verilerini ve anlık görüntüleri saklayın |
+| `--dry-run`     |      | Nelerin kaldırılmadan kaldırılacağı göster      |
+| `--force`       | `-f` | Onay istemlerini atla                           |
+
+---
+
+### upgrade
+
+sorycode'u en son sürüme veya belirli bir sürüme günceller.
+
+```bash
+sorycode upgrade [target]
+```
+
+En son sürüme yükseltmek için.
+
+```bash
+sorycode upgrade
+```
+
+Belirli bir sürüme yükseltmek için:
+
+```bash
+sorycode upgrade v0.1.48
+```
+
+#### Bayraklar
+
+| Bayrak     | Kısa | Açıklama                                               |
+| ---------- | ---- | ------------------------------------------------------ |
+| `--method` | `-m` | Kullanılan kurulum yöntemi: curl, npm, pnpm, bun, brew |
+
+---
+
+## Global bayraklar
+
+sorycode CLI aşağıdaki global bayrakları destekler.
+
+| Bayrak         | Kısa | Tanım                                    |
+| -------------- | ---- | ---------------------------------------- |
+| `--help`       | `-h` | Yardımı görüntüle                        |
+| `--version`    | `-v` | Sürüm numarasını yazdır                  |
+| `--print-logs` |      | Günlükleri stderr'e yazdır               |
+| `--log-level`  |      | Günlük düzeyi (DEBUG, INFO, WARN, ERROR) |
+
+---
+
+## Ortam değişkenleri
+
+sorycode ortam değişkenleri kullanılarak yapılandırılabilir.
+
+| Değişken                              | Tip     | Açıklama                                                                    |
+| ------------------------------------- | ------- | --------------------------------------------------------------------------- |
+| `SORYCODE_AUTO_SHARE`                 | boolean | Oturumları otomatik olarak paylaş                                           |
+| `SORYCODE_GIT_BASH_PATH`              | string  | Windows'ta yürütülebilir Git Bash'in Yolu                                   |
+| `SORYCODE_CONFIG`                     | string  | Yapılandırma dosyasının yolu                                                |
+| `SORYCODE_TUI_CONFIG`                 | string  | TUI yapılandırma dosyasının yolu                                            |
+| `SORYCODE_CONFIG_DIR`                 | string  | Yapılandırma dizinine giden yol                                             |
+| `SORYCODE_CONFIG_CONTENT`             | string  | Satır içi JSON config içeriği                                               |
+| `SORYCODE_DISABLE_AUTOUPDATE`         | boolean | Otomatik güncelleme kontrollerini devre dışı bırak                          |
+| `SORYCODE_DISABLE_PRUNE`              | boolean | Eski verilerin temizlenmesini devre dışı bırak                              |
+| `SORYCODE_DISABLE_TERMINAL_TITLE`     | boolean | Otomatik terminal başlığı güncellemelerini devre dışı bırakın               |
+| `SORYCODE_PERMISSION`                 | string  | Satır içi JSON izin config'i                                                |
+| `SORYCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Varsayılan eklentileri devre dışı bırakın                                   |
+| `SORYCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Otomatik LSP sunucu indirmelerini devre dışı bırakın                        |
+| `SORYCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Deneysel modelleri etkinleştir                                              |
+| `SORYCODE_DISABLE_AUTOCOMPACT`        | boolean | Otomatik context sıkıştırmayı devre dışı bırak                              |
+| `SORYCODE_DISABLE_CLAUDE_CODE`        | boolean | `.claude`'den okumayı devre dışı bırak (istem + beceriler)                  |
+| `SORYCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | `~/.claude/CLAUDE.md` dosyasını okumayı devre dışı bırak                    |
+| `SORYCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | `.claude/skills` yüklemesini devre dışı bırak                               |
+| `SORYCODE_DISABLE_MODELS_FETCH`       | boolean | Uzak kaynaklardan model getirmeyi devre dışı bırakın                        |
+| `SORYCODE_FAKE_VCS`                   | string  | Test amaçlı sahte VCS sağlayıcısı                                           |
+| `SORYCODE_DISABLE_FILETIME_CHECK`     | boolean | Optimizasyon için dosya süresi kontrolünü devre dışı bırakın                |
+| `SORYCODE_CLIENT`                     | string  | Client kimliği (varsayılan: `cli`)                                          |
+| `SORYCODE_ENABLE_EXA`                 | boolean | Exa web arama araçlarını etkinleştir                                        |
+| `SORYCODE_SERVER_PASSWORD`            | string  | `serve`/`web` için temel kimlik doğrulamayı etkinleştirin                   |
+| `SORYCODE_SERVER_USERNAME`            | string  | Temel kimlik doğrulama kullanıcı adını geçersiz kıl (varsayılan `sorycode`) |
+| `SORYCODE_MODELS_URL`                 | string  | Model yapılandırmasını almak için özel URL                                  |
+
+---
+
+### Deneysel
+
+Bu ortam değişkenleri değişebilecek veya kaldırılabilecek deneysel özellikleri etkinleştirir.
+
+| Değişken                                        | Tip     | Tanım                                                   |
+| ----------------------------------------------- | ------- | ------------------------------------------------------- |
+| `SORYCODE_EXPERIMENTAL`                         | boolean | Tüm deneysel özellikleri etkinleştir                    |
+| `SORYCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Simge bulmayı etkinleştir                               |
+| `SORYCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | TUI'da seçim yapıldığında kopyalamayı devre dışı bırak  |
+| `SORYCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | MS cinsinden bash komutları için varsayılan zaman aşımı |
+| `SORYCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | LLM yanıtları için maksimum çıktı belirteçleri          |
+| `SORYCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Tüm dizin için dosya izleyiciyi etkinleştir             |
+| `SORYCODE_EXPERIMENTAL_OXFMT`                   | boolean | Oxfmt biçimlendiriciyi etkinleştir                      |
+| `SORYCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Deneysel LSP aracını etkinleştir                        |
+| `SORYCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Dosya izleyiciyi devre dışı bırak                       |
+| `SORYCODE_EXPERIMENTAL_EXA`                     | boolean | Deneysel Exa özelliklerini etkinleştirin                |
+| `SORYCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Deneysel LSP tür denetimini etkinleştir                 |
+| `SORYCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Deneysel işaretleme özelliklerini etkinleştir           |
+| `SORYCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Plan modunu etkinleştir                                 |

@@ -1,0 +1,225 @@
+SoryCode koristi `permission` konfiguraciju da odluči da li će se određena radnja pokrenuti automatski, zatražiti od vas ili biti blokirana.
+Od `v1.1.1`, naslijeđena `tools` logička konfiguracija je zastarjela i spojena je u `permission`. Stara `tools` konfiguracija je još uvijek podržana za kompatibilnost unatrag.
+
+---
+
+## Akcije
+
+Svako pravilo dozvole rješava jedno od:
+
+- `"allow"` — pokrenuti bez odobrenja
+- `"ask"` — upit za odobrenje
+- `"deny"` — blokiraj akciju
+
+---
+
+## Konfiguracija
+
+Dozvole možete postaviti globalno (sa `*`) i nadjačati određene alate.
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "*": "ask",
+    "bash": "allow",
+    "edit": "deny"
+  }
+}
+```
+
+Također možete postaviti sve dozvole odjednom:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow"
+}
+```
+
+---
+
+## Granularna pravila (sintaksa objekta)
+
+Za većinu dozvola, možete koristiti objekt za primjenu različitih radnji na osnovu unosa alata.
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "npm *": "allow",
+      "rm *": "deny",
+      "grep *": "allow"
+    },
+    "edit": {
+      "*": "deny",
+      "packages/web/src/content/docs/*.mdx": "allow"
+    }
+  }
+}
+```
+
+Pravila se procjenjuju na osnovu podudaranja uzorka, pri čemu **pobjeđuje **poslednje odgovarajuće pravilo\*\_. Uobičajeni obrazac je da se prvo pravilo `"*"` stavi sveobuhvatno, a poslije njega konkretnija pravila.
+
+### Zamjenski znakovi
+
+Uzorci dozvola koriste jednostavno podudaranje zamjenskih znakova:
+
+- `*` odgovara nula ili više bilo kojeg znaka
+- `?` odgovara tačno jednom znaku
+- Svi ostali likovi se bukvalno podudaraju
+
+### Proširenje kućnog direktorija
+
+Možete koristiti `~` ili `$HOME` na početku obrasca da referencirate svoj početni direktorij. Ovo je posebno korisno za [`external_directory`](#external-directories) pravila.
+
+- `~/projects/*` -> `/Users/username/projects/*`
+- `$HOME/projects/*` -> `/Users/username/projects/*`
+- `~` -> `/Users/username`
+
+### Vanjski direktoriji
+
+Koristite `external_directory` da dozvolite pozive alata koji dodiruju putanje izvan radnog direktorija gdje je SoryCode pokrenut. Ovo se odnosi na bilo koji alat koji uzima putanju kao ulaz (na primjer `read`, `edit`, `list`, `glob`, `grep` i mnoge `bash` komande).
+Proširenje kuće (poput `~/...`) utiče samo na način na koji je obrazac napisan. Ne čini vanjsku stazu dijelom trenutnog radnog prostora, tako da staze izvan radnog direktorija i dalje moraju biti dozvoljene preko `external_directory`.
+Na primjer, ovo omogućava pristup svemu pod `~/projects/personal/`:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "~/projects/personal/**": "allow"
+    }
+  }
+}
+```
+
+Svaki direktorij koji je ovdje dozvoljen nasljeđuje iste zadane postavke kao trenutni radni prostor. Pošto je [`read` zadano na `allow`](#defaults), čitanje je također dozvoljeno za unose pod `external_directory` osim ako se ne poništi. Dodajte eksplicitna pravila kada bi alat trebao biti ograničen na ovim stazama, kao što je blokiranje uređivanja uz zadržavanje čitanja:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "~/projects/personal/**": "allow"
+    },
+    "edit": {
+      "~/projects/personal/**": "deny"
+    }
+  }
+}
+```
+
+Držite ovu listu fokusiranom na pouzdane putanje, a dodatna allow/deny pravila dodajte po potrebi za druge alate (npr. `bash`).
+
+## Dostupne dozvole
+
+Dozvole SoryCode su označene imenom alata, plus nekoliko sigurnosnih mjera:
+
+- `read` — čitanje datoteke (odgovara putanji datoteke)
+- `edit` — sve izmjene fajlova (pokriva `edit`, `write`, `patch`, `multiedit`)
+- `glob` — globbiranje fajla (odgovara glob uzorku)
+- `grep` — pretraga sadržaja (podudara se sa regularnim izrazom)
+- `list` — lista fajlova u direktorijumu (podudara se sa putanjom direktorijuma)
+- `bash` — izvođenje komandi ljuske (podudara se s raščlanjenim komandama kao što je `git status --porcelain`)
+- `task` — pokretanje subagenta (odgovara tipu podagenta)
+- `skill` — učitavanje vještine (odgovara nazivu vještine)
+- `lsp` — pokretanje LSP upita (trenutno negranularno)
+- `todoread`, `todowrite` — čitanje/ažuriranje liste obaveza
+- `webfetch` — dohvaćanje URL-a (odgovara URL-u)
+- `websearch`, `codesearch` — pretraživanje weba/koda (odgovara upitu)
+- `external_directory` — pokreće se kada alat dodirne staze izvan radnog direktorija projekta
+- `doom_loop` — aktivira se kada se isti poziv alata ponovi 3 puta sa identičnim unosom
+
+---
+
+## Zadane postavke
+
+Ako ništa ne navedete, SoryCode počinje od dozvoljenih zadanih vrijednosti:
+
+- Većina dozvola je zadana na `"allow"`.
+- `doom_loop` i `external_directory` zadano na `"ask"`.
+- `read` je `"allow"`, ali `.env` fajlovi su po defaultu odbijeni:
+
+```json title="sorycode.json"
+{
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    }
+  }
+}
+```
+
+---
+
+## Šta radi “Ask”
+
+Kada SoryCode zatraži odobrenje, korisničko sučelje nudi tri ishoda:
+
+- `once` — odobri samo ovaj zahtjev
+- `always` — odobri buduće zahtjeve koji odgovaraju predloženim obrascima (za ostatak trenutne SoryCode sesije)
+- `reject` — odbiti zahtjev
+  Skup obrazaca koje bi `always` odobrio pruža alat (na primjer, bash odobrenja obično stavljaju na bijelu listu sigurni prefiks komande kao što je `git status*`).
+
+---
+
+## Agenti
+
+Možete nadjačati dozvole po agentu. Dozvole agenta su spojene sa globalnom konfiguracijom, a pravila agenta imaju prednost. [Saznajte više](/docs/agents#permissions) o dozvolama agenta.
+:::note
+Pogledajte gornji odjeljak [Granularna pravila (sintaksa objekata)](#granular-rules-object-syntax) za detaljnije primjere podudaranja uzoraka.
+:::
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "git commit *": "deny",
+      "git push *": "deny",
+      "grep *": "allow"
+    }
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "bash": {
+          "*": "ask",
+          "git *": "allow",
+          "git commit *": "ask",
+          "git push *": "deny",
+          "grep *": "allow"
+        }
+      }
+    }
+  }
+}
+```
+
+Također možete konfigurirati dozvole agenta u Markdownu:
+
+```markdown title="~/.config/sorycode/agents/review.md"
+---
+description: Code review without edits
+mode: subagent
+permission:
+  edit: deny
+  bash: ask
+  webfetch: deny
+---
+
+Only analyze code and suggest changes.
+```
+
+:::tip
+Koristite podudaranje uzoraka za naredbe s argumentima. `"grep *"` dozvoljava `grep pattern file.txt`, dok bi ga samo `"grep"` blokirao. Naredbe poput `git status` rade za zadano ponašanje, ali zahtijevaju eksplicitnu dozvolu (kao `"git status *"`) kada se prosljeđuju argumenti.
+:::

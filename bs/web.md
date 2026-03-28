@@ -1,0 +1,137 @@
+SoryCode može raditi kao web aplikacija u vašem pretraživaču, pružajući isto moćno iskustvo AI kodiranja bez potrebe za terminalom.
+
+![SoryCode Web - Nova sesija](../../../assets/web/web-homepage-new-session.png)
+
+## Početak rada
+
+Pokrenite web interfejs tako što ćete pokrenuti:
+
+```bash
+sorycode web
+```
+
+Ovo pokreće lokalni server na `127.0.0.1` sa nasumičnim dostupnim portom i automatski otvara SoryCode u vašem podrazumevanom pretraživaču.
+
+:::caution
+Ako `SORYCODE_SERVER_PASSWORD` nije postavljen, server će biti nezaštićen. Ovo je u redu za lokalnu upotrebu, ali bi trebalo biti postavljeno za pristup mreži.
+:::
+
+:::tip[Windows korisnici]
+Za najbolje iskustvo, pokrenite `sorycode web` iz [WSL](/docs/windows-wsl) umjesto PowerShell-a. Ovo osigurava pravilan pristup sistemu datoteka i integraciju terminala.
+:::
+
+---
+
+## Konfiguracija
+
+Možete konfigurirati web server koristeći oznake komandne linije ili u vašoj [config file](/docs/config).
+
+### Port
+
+SoryCode podrazumevano bira dostupni port. Možete odrediti port:
+
+```bash
+sorycode web --port 4096
+```
+
+### Ime hosta
+
+Podrazumevano, server se vezuje za `127.0.0.1` (samo lokalni host). Da biste SoryCode učinili dostupnim na vašoj mreži:
+
+```bash
+sorycode web --hostname 0.0.0.0
+```
+
+Kada koristite `0.0.0.0`, SoryCode će prikazati i lokalne i mrežne adrese:
+
+```
+  Local access:       http://localhost:4096
+  Network access:     http://192.168.1.100:4096
+```
+
+### mDNS Otkrivanje
+
+Omogućite mDNS kako bi vaš server bio vidljiv na lokalnoj mreži:
+
+```bash
+sorycode web --mdns
+```
+
+Ovo automatski postavlja ime hosta na `0.0.0.0` i oglašava server kao `sorycode.local`.
+
+Možete prilagoditi ime mDNS domene za pokretanje više instanci na istoj mreži:
+
+```bash
+sorycode web --mdns --mdns-domain myproject.local
+```
+
+### CORS
+
+Da biste omogućili dodatne domene za CORS (korisno za prilagođene frontendove):
+
+```bash
+sorycode web --cors https://example.com
+```
+
+### Autentifikacija
+
+Da biste zaštitili pristup, postavite lozinku koristeći varijablu okruženja `SORYCODE_SERVER_PASSWORD`:
+
+```bash
+SORYCODE_SERVER_PASSWORD=secret sorycode web
+```
+
+Korisničko ime podrazumevano je `sorycode`, ali se može promeniti sa `SORYCODE_SERVER_USERNAME`.
+
+---
+
+## Korištenje web sučelja
+
+Jednom pokrenut, web sučelje pruža pristup vašim SoryCode sesijama.
+
+### Sesije
+
+Pregledajte i upravljajte svojim sesijama sa početne stranice. Možete vidjeti aktivne sesije i započeti nove.
+
+![SoryCode Web - aktivna sesija](../../../assets/web/web-homepage-active-session.png)
+
+### Status servera
+
+Kliknite "Pogledajte servere" da vidite povezane servere i njihov status.
+
+![SoryCode Web - Vidi servere](../../../assets/web/web-homepage-see-servers.png)
+
+---
+
+## Povezivanje terminala
+
+Možete priključiti TUI terminala na aktivni web server:
+
+```bash
+# Start the web server
+sorycode web --port 4096
+
+# In another terminal, attach the TUI
+sorycode attach http://localhost:4096
+```
+
+Ovo vam omogućava da istovremeno koristite i web sučelje i terminal, dijeleći iste sesije i stanje.
+
+---
+
+## Konfiguracioni fajl
+
+Također možete konfigurirati postavke servera u svom `sorycode.json` konfiguracijskom fajlu:
+
+```json
+{
+  "server": {
+    "port": 4096,
+    "hostname": "0.0.0.0",
+    "mdns": true,
+    "cors": ["https://example.com"]
+  }
+}
+```
+
+Oznake komandne linije imaju prednost nad postavkama konfiguracione datoteke.

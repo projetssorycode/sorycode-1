@@ -1,0 +1,395 @@
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+SoryCode fournit une interface de terminal interactif ou TUI pour travailler sur vos projets avec un LLM.
+
+L’exécution de SoryCode démarre le TUI pour le répertoire actuel.
+
+```bash
+sorycode
+```
+
+Ou vous pouvez le démarrer pour un répertoire de travail spécifique.
+
+```bash
+sorycode /path/to/project
+```
+
+Une fois que vous êtes dans le TUI, vous pouvez lui envoyer un message.
+
+```text
+Give me a quick summary of the codebase.
+```
+
+---
+
+## Références de fichiers
+
+Vous pouvez référencer des fichiers dans vos messages en utilisant `@`. Cela effectue une recherche de fichier floue dans le répertoire de travail actuel.
+
+:::tip
+Vous pouvez également utiliser `@` pour référencer des fichiers dans vos messages.
+:::
+
+```text "@packages/functions/src/api/index.ts"
+How is auth handled in @packages/functions/src/api/index.ts?
+```
+
+Le contenu du fichier est automatiquement ajouté à la conversation.
+
+---
+
+## Commandes Bash
+
+Démarrez un message avec `!` pour exécuter une commande shell.
+
+```bash frame="none"
+!ls -la
+```
+
+Le résultat de la commande est ajouté à la conversation en tant que résultat de l'outil.
+
+---
+
+## Commandes
+
+Lorsque vous utilisez le SoryCode TUI, vous pouvez taper `/` suivi d'un nom de commande pour exécuter rapidement des actions. Par exemple:
+
+```bash frame="none"
+/help
+```
+
+La plupart des commandes ont également une liaison clavier utilisant `ctrl+x` comme touche leader, où `ctrl+x` est la touche leader par défaut. [En savoir plus](/docs/keybinds).
+
+Voici toutes les commandes slash disponibles :
+
+---
+
+### connect
+
+Ajoutez un fournisseur à SoryCode. Vous permet de sélectionner parmi les fournisseurs disponibles et d’ajouter leurs clés API.
+
+```bash frame="none"
+/connect
+```
+
+---
+
+### compact
+
+Compactez la session en cours. *Alias* : `/summarize`
+
+```bash frame="none"
+/compact
+```
+
+**Reliure de touches :** `ctrl+x c`
+
+---
+
+### details
+
+Basculer les détails d'exécution de l'outil.
+
+```bash frame="none"
+/details
+```
+
+**Reliure de touches :** `ctrl+x d`
+
+---
+
+### editor
+
+Ouvrez un éditeur externe pour rédiger des messages. Utilise l'éditeur défini dans votre variable d'environnement `EDITOR`. [En savoir plus](#editor-setup).
+
+```bash frame="none"
+/editor
+```
+
+**Reliure de touches :** `ctrl+x e`
+
+---
+
+### exit
+
+Quittez SoryCode. *Alias* : `/quit`, `/q`
+
+```bash frame="none"
+/exit
+```
+
+**Reliure de touches :** `ctrl+x q`
+
+---
+
+### export
+
+Exportez la conversation en cours vers Markdown et ouvrez-la dans votre éditeur par défaut. Utilise l'éditeur défini dans votre variable d'environnement `EDITOR`. [En savoir plus](#editor-setup).
+
+```bash frame="none"
+/export
+```
+
+**Reliure de touches :** `ctrl+x x`
+
+---
+
+### help
+
+Afficher la boîte de dialogue d'aide.
+
+```bash frame="none"
+/help
+```
+
+**Reliure de touches :** `ctrl+x h`
+
+---
+
+### init
+
+Créez ou mettez à jour le fichier `AGENTS.md`. [En savoir plus](/docs/rules).
+
+```bash frame="none"
+/init
+```
+
+**Reliure de touches :** `ctrl+x i`
+
+---
+
+### models
+
+Liste des modèles disponibles.
+
+```bash frame="none"
+/models
+```
+
+**Reliure de touches :** `ctrl+x m`
+
+---
+
+### new
+
+Démarrez une nouvelle session. *Alias* : `/clear`
+
+```bash frame="none"
+/new
+```
+
+**Reliure de touches :** `ctrl+x n`
+
+---
+
+### redo
+
+Refaire un message précédemment annulé. Disponible uniquement après avoir utilisé `/undo`.
+
+:::tip
+Toutes les modifications de fichiers seront également restaurées.
+:::
+
+En interne, cela utilise Git pour gérer les modifications de fichiers. Votre projet **doit donc
+être un dépôt Git**.
+
+```bash frame="none"
+/redo
+```
+
+**Reliure de touches :** `ctrl+x r`
+
+---
+
+### sessions
+
+Répertoriez et basculez entre les sessions. *Alias* : `/resume`, `/continue`
+
+```bash frame="none"
+/sessions
+```
+
+**Reliure de touches :** `ctrl+x l`
+
+---
+
+### share
+
+Partager la session en cours. [En savoir plus](/docs/share).
+
+```bash frame="none"
+/share
+```
+
+**Reliure de touches :** `ctrl+x s`
+
+---
+
+### theme
+
+Répertoriez les thèmes disponibles.
+
+```bash frame="none"
+/theme
+```
+
+**Reliure de touches :** `ctrl+x t`
+
+---
+
+### thinking
+
+Activez/désactivez la visibilité des blocages de réflexion/raisonnement dans la conversation. Lorsque cette option est activée, vous pouvez voir le processus de raisonnement du modèle pour les modèles prenant en charge la réflexion étendue.
+
+:::note
+Cette commande contrôle uniquement si les blocs de réflexion sont **affichés** ; elle n'active ni ne désactive les capacités de raisonnement du modèle. Pour basculer entre les capacités de raisonnement réelles, utilisez `ctrl+t` pour parcourir les variantes du modèle.
+:::
+
+```bash frame="none"
+/thinking
+```
+
+---
+
+### undo
+
+Annuler le dernier message de la conversation. Supprime le message utilisateur le plus récent, toutes les réponses ultérieures et toutes les modifications de fichier.
+
+:::tip
+Toutes les modifications apportées au fichier seront également annulées.
+:::
+
+En interne, cela utilise Git pour gérer les modifications de fichiers. Votre projet **doit donc
+être un dépôt Git**.
+
+```bash frame="none"
+/undo
+```
+
+**Reliure de touches :** `ctrl+x u`
+
+---
+
+### unshare
+
+Annuler le partage de la session en cours. [En savoir plus](/docs/share#un-sharing).
+
+```bash frame="none"
+/unshare
+```
+
+---
+
+## Configuration de l'éditeur
+
+Les commandes `/editor` et `/export` utilisent l'éditeur spécifié dans votre variable d'environnement `EDITOR`.
+
+<Tabs>
+  <TabItem label="Linux/macOS">
+    ```bash
+    # Example for nano or vim
+    export EDITOR=nano
+    export EDITOR=vim
+
+    # For GUI editors, VS Code, Cursor, VSCodium, Windsurf, Zed, etc.
+    # include --wait
+    export EDITOR="code --wait"
+    ```
+
+Pour le rendre permanent, ajoutez-le à votre profil shell ;
+`~/.bashrc`, `~/.zshrc`, etc.
+
+  </TabItem>
+
+  <TabItem label="Windows (CMD)">
+    ```bash
+    set EDITOR=notepad
+
+    # For GUI editors, VS Code, Cursor, VSCodium, Windsurf, Zed, etc.
+    # include --wait
+    set EDITOR=code --wait
+    ```
+
+Pour le rendre permanent, utilisez **Propriétés système** > **Environnement
+Variables**.
+
+  </TabItem>
+
+  <TabItem label="Windows (PowerShell)">
+    ```powershell
+    $env:EDITOR = "notepad"
+
+    # For GUI editors, VS Code, Cursor, VSCodium, Windsurf, Zed, etc.
+    # include --wait
+    $env:EDITOR = "code --wait"
+    ```
+
+Pour le rendre permanent, ajoutez-le à votre profil PowerShell.
+
+  </TabItem>
+</Tabs>
+
+Les options d'éditeur populaires incluent :
+
+- `code`-Code Visual Studio
+- `cursor` - Curseur
+- `windsurf` - Planche à voile
+- `nvim` - Editeur Neovim
+- `vim` - Éditeur Vim
+- `nano` - Éditeur nano
+- `notepad` - Windows Bloc-notes
+- `subl` - Texte sublime
+
+:::note
+Certains éditeurs comme VS Code doivent être démarrés avec le drapeau `--wait`.
+:::
+
+Certains éditeurs ont besoin d'arguments de ligne de commande pour s'exécuter en mode blocage. L'indicateur `--wait` bloque le processus de l'éditeur jusqu'à sa fermeture.
+
+---
+
+## Configurer
+
+Vous pouvez personnaliser le comportement de TUI via `tui.json` (ou `tui.jsonc`).
+
+```json title="tui.json"
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "theme": "sorycode",
+  "keybinds": {
+    "leader": "ctrl+x"
+  },
+  "scroll_speed": 3,
+  "scroll_acceleration": {
+    "enabled": true
+  },
+  "diff_style": "auto"
+}
+```
+
+Ceci est séparé de `sorycode.json`, qui configure le comportement du serveur/d'exécution.
+
+### Options
+
+- `theme` - Définit votre thème d'interface utilisateur. [En savoir plus](/docs/themes).
+- `keybinds` - Personnalise les raccourcis clavier. [En savoir plus](/docs/keybinds).
+- `scroll_acceleration.enabled` - Activez l'accélération de défilement de style macOS pour un défilement fluide et naturel. Lorsqu'elle est activée, la vitesse de défilement augmente avec les gestes de défilement rapides et reste précise pour les mouvements plus lents. **Ce paramètre est prioritaire sur `scroll_speed` et le remplace lorsqu'il est activé.**
+- `scroll_speed` - Contrôle la vitesse de défilement du TUI lors de l'utilisation des commandes de défilement (minimum : `0.001`, prend en charge les valeurs décimales). La valeur par défaut est `3`. **Remarque : Ceci est ignoré si `scroll_acceleration.enabled` est défini sur `true`.**
+- `diff_style` - Contrôle le rendu différentiel. `"auto"` s'adapte à la largeur du terminal, `"stacked"` affiche toujours une seule colonne.
+
+Utilisez `SORYCODE_TUI_CONFIG` pour charger un chemin de configuration TUI personnalisé.
+
+---
+
+## Personnalisation
+
+Vous pouvez personnaliser divers aspects de la vue TUI à l'aide de la palette de commandes (`ctrl+x h` ou `/help`). Ces paramètres persistent lors des redémarrages.
+
+---
+
+#### Affichage du nom d'utilisateur
+
+Indiquez si votre nom d'utilisateur apparaît dans les messages de discussion. Accédez-y via :
+
+- Palette de commandes : recherchez "nom d'utilisateur" ou "masquer le nom d'utilisateur"
+- Le paramètre persiste automatiquement et sera mémorisé au cours de TUI sessions.

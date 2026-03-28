@@ -1,0 +1,232 @@
+SoryCode verwendet die `permission`-Konfiguration, um zu entscheiden, ob eine bestimmte Aktion automatisch ausgeführt werden soll, Sie dazu auffordern oder blockiert werden soll.
+
+Ab `v1.1.1` ist die alte boolesche Konfiguration `tools` veraltet und wurde in `permission` zusammengeführt. Die alte `tools`-Konfiguration wird aus Gründen der Abwärtskompatibilität weiterhin unterstützt.
+
+---
+
+## Aktionen
+
+Jede Berechtigungsregel wird zu einem der folgenden aufgelöst:
+
+- `"allow"` – ohne Genehmigung ausführen
+- `"ask"` — um Genehmigung bitten
+- `"deny"` – Aktion blockieren
+
+---
+
+## Konfiguration
+
+Sie können Berechtigungen global festlegen (mit `*`) und bestimmte Tools überschreiben.
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "*": "ask",
+    "bash": "allow",
+    "edit": "deny"
+  }
+}
+```
+
+Sie können auch alle Berechtigungen auf einmal festlegen:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow"
+}
+```
+
+---
+
+## Granulare Regeln (Objektsyntax)
+
+Bei den meisten Berechtigungen können Sie ein Objekt verwenden, um basierend auf der Werkzeugeingabe verschiedene Aktionen anzuwenden.
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "npm *": "allow",
+      "rm *": "deny",
+      "grep *": "allow"
+    },
+    "edit": {
+      "*": "deny",
+      "packages/web/src/content/docs/*.mdx": "allow"
+    }
+  }
+}
+```
+
+Regeln werden nach Musterübereinstimmung ausgewertet, wobei die **letzte übereinstimmende Regel gewinnt**. Ein gängiges Muster besteht darin, zuerst die Catch-All-Regel `"*"` und danach spezifischere Regeln zu platzieren.
+
+### Platzhalter
+
+Berechtigungsmuster verwenden einen einfachen Platzhalterabgleich:
+
+- `*` matches zero or more of any character
+- `?` matches exactly one character
+- Alle anderen Zeichen stimmen wörtlich überein
+
+### Erweiterung des Home-Verzeichnisses
+
+Sie können `~` oder `$HOME` am Anfang eines Musters verwenden, um auf Ihr Home-Verzeichnis zu verweisen. Dies ist besonders nützlich für [`external_directory`](#external-directories)-Regeln.
+
+- `~/projects/*` -> `/Users/username/projects/*`
+- `$HOME/projects/*` -> `/Users/username/projects/*`
+- `~` -> `/Users/username`
+
+### Externe Verzeichnisse
+
+Verwenden Sie `external_directory`, um Toolaufrufe zuzulassen, die Pfade außerhalb des Arbeitsverzeichnisses berühren, in dem SoryCode gestartet wurde. Dies gilt für jedes Werkzeug, das einen Pfad als Eingabe verwendet (z. B. `read`, `edit`, `list`, `glob`, `grep` und viele `bash`-Befehle).
+
+Die Home-Erweiterung (wie `~/...`) wirkt sich nur darauf aus, wie ein Muster geschrieben wird. Dadurch wird ein externer Pfad nicht zum Teil des aktuellen Arbeitsbereichs, daher müssen Pfade außerhalb des Arbeitsverzeichnisses weiterhin über `external_directory` zulässig sein.
+
+Dies ermöglicht beispielsweise den Zugriff auf alles unter `~/projects/personal/`:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "~/projects/personal/**": "allow"
+    }
+  }
+}
+```
+
+Jedes hier zulässige Verzeichnis erbt dieselben Standardeinstellungen wie der aktuelle Arbeitsbereich. Seit [`read` defaults to `allow`](#defaults) sind Lesevorgänge auch für Einträge unter `external_directory` zulässig, sofern sie nicht überschrieben werden. Fügen Sie explizite Regeln hinzu, wenn ein Tool in diesen Pfaden eingeschränkt werden soll, z. B. das Blockieren von Bearbeitungen, während Lesevorgänge beibehalten werden:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "~/projects/personal/**": "allow"
+    },
+    "edit": {
+      "~/projects/personal/**": "deny"
+    }
+  }
+}
+```
+
+Konzentrieren Sie sich in der Liste auf vertrauenswürdige Pfade und fügen Sie bei Bedarf zusätzliche Zulassungs- oder Ablehnungsregeln für andere Tools hinzu (z. B. `bash`).
+
+---
+
+## Verfügbare Berechtigungen
+
+SoryCode-Berechtigungen basieren auf Tool-Namen sowie einigen Sicherheitsvorkehrungen:
+
+- `read` – eine Datei lesen (entspricht dem Dateipfad)
+- `edit` – alle Dateiänderungen (umfasst `edit`, `write`, `patch`, `multiedit`)
+- `glob` – Datei-Globbing (entspricht dem Glob-Muster)
+- `grep` – Inhaltssuche (entspricht dem Regex-Muster)
+- `list` – Auflistung der Dateien in einem Verzeichnis (entspricht dem Verzeichnispfad)
+- `bash` – Ausführen von Shell-Befehlen (entspricht analysierten Befehlen wie `git status --porcelain`)
+- `task` – Subagenten starten (entspricht dem Subagententyp)
+- `skill` – Laden einer Fertigkeit (entspricht dem Fertigkeitsnamen)
+- `lsp` – Ausführen von LSP-Abfragen (derzeit nicht granular)
+- `todoread`, `todowrite` – lesen/aktualisieren der Aufgabenliste
+- `webfetch` – Abrufen eines URL (entspricht dem URL)
+- `websearch`, `codesearch` – web/code Suche (entspricht der Abfrage)
+- `external_directory` – wird ausgelöst, wenn ein Tool Pfade außerhalb des Projektarbeitsverzeichnisses berührt
+- `doom_loop` – wird ausgelöst, wenn derselbe Werkzeugaufruf dreimal mit identischer Eingabe wiederholt wird
+
+---
+
+## Standardwerte
+
+Wenn Sie nichts angeben, beginnt SoryCode mit zulässigen Standardeinstellungen:
+
+- Die meisten Berechtigungen sind standardmäßig auf `"allow"` eingestellt.
+- `doom_loop` und `external_directory` sind standardmäßig `"ask"`.
+- `read` ist `"allow"`, aber `.env`-Dateien werden standardmäßig verweigert:
+
+```json title="sorycode.json"
+{
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    }
+  }
+}
+```
+
+---
+
+## Was „Fragen“ bewirkt
+
+Wenn SoryCode zur Genehmigung auffordert, bietet UI drei Ergebnisse:
+
+- `once` – nur diese Anfrage genehmigen
+- `always` – zukünftige Anfragen genehmigen, die den vorgeschlagenen Mustern entsprechen (für den Rest der aktuellen SoryCode-Sitzung)
+- `reject` – die Anfrage ablehnen
+
+Der Satz von Mustern, die `always` genehmigen würde, wird vom Tool bereitgestellt (Beispiel: Bash-Genehmigungen setzen normalerweise ein sicheres Befehlspräfix wie `git status*` auf die Whitelist).
+
+---
+
+## Agenten
+
+Sie können Berechtigungen pro Agent überschreiben. Agentenberechtigungen werden mit der globalen Konfiguration zusammengeführt und Agentenregeln haben Vorrang. [Learn more](/docs/agents#permissions) über Agentenberechtigungen.
+
+:::note
+Ausführlichere Mustervergleichsbeispiele finden Sie oben im Abschnitt [Granular Rules (Object Syntax)](#granular-rules-object-syntax).
+:::
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "git commit *": "deny",
+      "git push *": "deny",
+      "grep *": "allow"
+    }
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "bash": {
+          "*": "ask",
+          "git *": "allow",
+          "git commit *": "ask",
+          "git push *": "deny",
+          "grep *": "allow"
+        }
+      }
+    }
+  }
+}
+```
+
+Sie können Agentenberechtigungen auch in Markdown konfigurieren:
+
+```markdown title="~/.config/sorycode/agents/review.md"
+---
+description: Code review without edits
+mode: subagent
+permission:
+  edit: deny
+  bash: ask
+  webfetch: deny
+---
+
+Only analyze code and suggest changes.
+```
+
+:::tip
+Verwenden Sie den Mustervergleich für Befehle mit Argumenten. `"grep *"` erlaubt `grep pattern file.txt`, während `"grep"` allein es blockieren würde. Befehle wie `git status` funktionieren für das Standardverhalten, erfordern jedoch eine explizite Erlaubnis (wie `"git status *"`), wenn Argumente übergeben werden.
+:::

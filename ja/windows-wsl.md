@@ -1,0 +1,111 @@
+import { Steps } from "@astrojs/starlight/components"
+
+SoryCode は Windows で直接実行できますが、より快適に使うには [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) の利用をおすすめします。WSL は SoryCode の機能とスムーズに連携する Linux 環境を提供します。
+
+:::tip[WSL を使う理由]
+WSL を使うと、ファイルシステム性能、ターミナルサポート、SoryCode が依存する開発ツールとの互換性が向上します。
+:::
+
+---
+
+## セットアップ
+
+<Steps>
+
+1. **WSL をインストールする**
+
+   まだの場合は、Microsoft 公式ガイドを使って [WSL をインストール](https://learn.microsoft.com/en-us/windows/wsl/install) します。
+
+2. **WSL で SoryCode をインストールする**
+
+   WSL の準備ができたら WSL のターミナルを開き、[インストール方法](/docs/) のいずれかで SoryCode をインストールします。
+
+   ```bash
+   curl -fsSL https://opencode.ai/install | bash
+   ```
+
+3. **WSL から SoryCode を使う**
+
+   プロジェクトディレクトリに移動し（Windows ファイルは `/mnt/c/` や `/mnt/d/` などからアクセス）、SoryCode を実行します。
+
+   ```bash
+   cd /mnt/c/Users/YourName/project
+   sorycode
+   ```
+
+</Steps>
+
+---
+
+## デスクトップアプリ + WSL サーバー
+
+SoryCode デスクトップアプリを使いつつ、サーバーは WSL で動かしたい場合は次の手順です。
+
+1. **WSL でサーバーを起動する**
+
+   外部接続を許可するため、`--hostname 0.0.0.0` を付けて起動します。
+
+   ```bash
+   sorycode serve --hostname 0.0.0.0 --port 4096
+   ```
+
+2. **デスクトップアプリを接続する**
+
+   `http://localhost:4096` に接続します。
+
+:::note
+環境によって `localhost` が使えない場合は、WSL 側で `hostname -I` を実行して IP アドレスを確認し、`http://<wsl-ip>:4096` に接続してください。
+:::
+:::caution
+`--hostname 0.0.0.0` を使う場合は、`SORYCODE_SERVER_PASSWORD` を設定してサーバーを保護してください。
+
+```bash
+SORYCODE_SERVER_PASSWORD=your-password sorycode serve --hostname 0.0.0.0
+```
+
+:::
+
+## Web クライアント + WSL
+
+Windows で Web 利用を快適にするには:
+
+1. **PowerShell ではなく WSL ターミナルで `sorycode web` を実行する**
+
+   ```bash
+   sorycode web --hostname 0.0.0.0
+   ```
+
+2. **Windows のブラウザからアクセスする**
+
+   `http://localhost:<port>` にアクセスします（URL は SoryCode が表示します）。
+
+WSL から `sorycode web` を実行すると、適切なファイルシステムアクセスとターミナル統合を維持したまま、Windows ブラウザから利用できます。
+
+---
+
+## Windows ファイルへのアクセス
+
+WSL からは `/mnt/` ディレクトリ経由で Windows ファイルにアクセスできます。
+
+- `C:` drive → `/mnt/c/`
+- `D:` drive → `/mnt/d/`
+- そのほかのドライブも同様です
+
+例:
+
+```bash
+cd /mnt/c/Users/YourName/Documents/project
+sorycode
+```
+
+:::tip
+よりスムーズに使うには、リポジトリを WSL のファイルシステム（例: `~/code/`）にクローンまたはコピーして、そこで SoryCode を実行することをおすすめします。
+:::
+
+---
+
+## ヒント
+
+- Windows ドライブ上のプロジェクトでも、SoryCode は WSL で実行するとファイルアクセスがスムーズです
+- SoryCode と一緒に VS Code の [WSL 拡張機能](https://code.visualstudio.com/docs/remote/wsl) を使うと統合的な開発フローを構築できます
+- SoryCode の設定とセッションは WSL 環境内の `~/.local/share/sorycode/` に保存されます

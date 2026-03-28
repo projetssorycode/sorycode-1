@@ -1,0 +1,137 @@
+O sorycode pode ser executado como uma aplicação web no seu navegador, proporcionando a mesma poderosa experiência de codificação com IA sem precisar de um terminal.
+
+![sorycode Web - Nova Sessão](../../../assets/web/web-homepage-new-session.png)
+
+## Primeiros passos
+
+Inicie a interface web executando:
+
+```bash
+sorycode web
+```
+
+Isso inicia um servidor local em `127.0.0.1` com uma porta aleatória disponível e abre automaticamente o sorycode no seu navegador padrão.
+
+:::caution
+Se `SORYCODE_SERVER_PASSWORD` não estiver definido, o servidor ficará sem segurança. Isso é aceitável para uso local, mas deve ser configurado para acesso à rede.
+:::
+
+:::tip[Usuários do Windows]
+Para a melhor experiência, execute `sorycode web` a partir do [WSL](/docs/windows-wsl) em vez do PowerShell. Isso garante acesso adequado ao sistema de arquivos e integração com o terminal.
+:::
+
+---
+
+## Configuração
+
+Você pode configurar o servidor web usando flags de linha de comando ou no seu [arquivo de configuração](/docs/config).
+
+### Porta
+
+Por padrão, o sorycode escolhe uma porta disponível. Você pode especificar uma porta:
+
+```bash
+sorycode web --port 4096
+```
+
+### Nome do Host
+
+Por padrão, o servidor se vincula a `127.0.0.1` (apenas localhost). Para tornar o sorycode acessível na sua rede:
+
+```bash
+sorycode web --hostname 0.0.0.0
+```
+
+Ao usar `0.0.0.0`, o sorycode exibirá endereços locais e de rede:
+
+```
+  Local access:       http://localhost:4096
+  Network access:     http://192.168.1.100:4096
+```
+
+### Descoberta mDNS
+
+Ative o mDNS para tornar seu servidor descobrível na rede local:
+
+```bash
+sorycode web --mdns
+```
+
+Isso define automaticamente o nome do host como `0.0.0.0` e anuncia o servidor como `sorycode.local`.
+
+Você pode personalizar o nome de domínio mDNS para executar várias instâncias na mesma rede:
+
+```bash
+sorycode web --mdns --mdns-domain myproject.local
+```
+
+### CORS
+
+Para permitir domínios adicionais para CORS (útil para frontends personalizados):
+
+```bash
+sorycode web --cors https://example.com
+```
+
+### Autenticação
+
+Para proteger o acesso, defina uma senha usando a variável de ambiente `SORYCODE_SERVER_PASSWORD`:
+
+```bash
+SORYCODE_SERVER_PASSWORD=secret sorycode web
+```
+
+O nome de usuário padrão é `sorycode`, mas pode ser alterado com `SORYCODE_SERVER_USERNAME`.
+
+---
+
+## Usando a Interface Web
+
+Uma vez iniciada, a interface web fornece acesso às suas sessões do sorycode.
+
+### Sessões
+
+Visualize e gerencie suas sessões a partir da página inicial. Você pode ver sessões ativas e iniciar novas.
+
+![sorycode Web - Sessão Ativa](../../../assets/web/web-homepage-active-session.png)
+
+### Status do Servidor
+
+Clique em "Ver Servidores" para visualizar os servidores conectados e seu status.
+
+![sorycode Web - Ver Servidores](../../../assets/web/web-homepage-see-servers.png)
+
+---
+
+## Anexando um Terminal
+
+Você pode anexar um terminal TUI a um servidor web em execução:
+
+```bash
+# Start the web server
+sorycode web --port 4096
+
+# In another terminal, attach the TUI
+sorycode attach http://localhost:4096
+```
+
+Isso permite que você use tanto a interface web quanto o terminal simultaneamente, compartilhando as mesmas sessões e estado.
+
+---
+
+## Arquivo de Configuração
+
+Você também pode configurar as configurações do servidor no seu arquivo de configuração `sorycode.json`:
+
+```json
+{
+  "server": {
+    "port": 4096,
+    "hostname": "0.0.0.0",
+    "mdns": true,
+    "cors": ["https://example.com"]
+  }
+}
+```
+
+As flags de linha de comando têm precedência sobre as configurações do arquivo de configuração.

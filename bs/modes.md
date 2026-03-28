@@ -1,0 +1,311 @@
+:::caution
+Načini se sada konfiguriraju preko opcije `agent` u konfiguraciji otvorenog koda. The
+`mode` opcija je sada zastarjela. [Saznajte više](/docs/agents).
+:::
+
+Režimi u otvorenom kodu omogućavaju vam da prilagodite ponašanje, alate i upite za različite slučajeve upotrebe.
+Dolazi sa dva ugrađena načina rada: **build** i **plan**. Možete prilagoditi
+ove ili konfigurirajte svoje putem sorycode config.
+Možete se prebacivati ​​između režima tokom sesije ili ih konfigurisati u svom konfiguracionom fajlu.
+
+---
+
+## Ugrađeni
+
+sorycode dolazi sa dva ugrađena načina rada.
+
+### Build
+
+Build je **podrazumijevani** režim sa svim omogućenim alatima. Ovo je standardni način rada za razvoj kada vam treba pun pristup fajlovima i sistemskim komandama.
+
+### Plan
+
+Ograničeni način rada dizajniran za planiranje i analizu. U načinu plana, sljedeći alati su onemogućeni prema zadanim postavkama:
+
+- `write` - Ne mogu kreirati nove fajlove
+- `edit` - Ne mogu modificirati postojeće fajlove, osim fajlova koji se nalaze na `.sorycode/plans/*.md` radi detaljiziranja samog plana
+- `patch` - Ne mogu primijeniti zakrpe
+- `bash` - Ne mogu izvršiti naredbe ljuske
+  Ovaj način rada je koristan kada želite da AI analizira kod, predlaže promjene ili kreira planove bez ikakvih stvarnih modifikacija u vašoj bazi kodova.
+
+---
+
+## Prebacivanje
+
+Možete se prebacivati ​​između načina rada tokom sesije pomoću tipke _Tab_. Ili vaše konfigurirano `switch_mode` spajanje tipki.
+Vidi također: [Formatters](/docs/formatters) za informacije o konfiguraciji formatiranja koda.
+
+---
+
+## Konfiguracija
+
+Možete prilagoditi ugrađene načine rada ili kreirati vlastite kroz konfiguraciju. Modovi se mogu konfigurirati na dva načina:
+
+### JSON konfiguracija
+
+Konfigurirajte načine rada u svom `sorycode.json` konfiguracijskom fajlu:
+
+```json title="sorycode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mode": {
+    "build": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "prompt": "{file:./prompts/build.txt}",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "plan": {
+      "model": "anthropic/claude-haiku-4-20250514",
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false
+      }
+    }
+  }
+}
+```
+
+### Markdown konfiguracija
+
+Također možete definirati načine rada koristeći markdown datoteke. Postavite ih u:
+
+- Globalno: `~/.config/sorycode/modes/`
+- Projekat: `.sorycode/modes/`
+
+```markdown title="~/.config/sorycode/modes/review.md"
+---
+model: anthropic/claude-sonnet-4-20250514
+temperature: 0.1
+tools:
+  write: false
+  edit: false
+  bash: false
+---
+
+You are in code review mode. Focus on:
+
+- Code quality and best practices
+- Potential bugs and edge cases
+- Performance implications
+- Security considerations
+
+Provide constructive feedback without making direct changes.
+```
+
+Naziv datoteke s uštedom postaje naziv načina (npr. `review.md` kreira `review` način rada).
+Pogledajmo ove opcije konfiguracije detaljno.
+
+---
+
+### Model
+
+Koristite `model` konfiguraciju da nadjačate zadani model za ovaj način rada. Korisno za korištenje različitih modela optimiziranih za različite zadatke. Na primjer, brži model za planiranje, sposobniji model za implementaciju.
+
+```json title="sorycode.json"
+{
+  "mode": {
+    "plan": {
+      "model": "anthropic/claude-haiku-4-20250514"
+    }
+  }
+}
+```
+
+---
+
+### Temperatura
+
+Kontrolišite slučajnost i kreativnost odgovora AI pomoću `temperature` konfiguracije. Niže vrijednosti čine odgovore fokusiranijim i determinističkim, dok veće vrijednosti povećavaju kreativnost i varijabilnost.
+
+```json title="sorycode.json"
+{
+  "mode": {
+    "plan": {
+      "temperature": 0.1
+    },
+    "creative": {
+      "temperature": 0.8
+    }
+  }
+}
+```
+
+Vrijednosti temperature obično se kreću od 0,0 do 1,0:
+
+- **0,0-0,2**: Vrlo fokusirani i deterministički odgovori, idealni za analizu i planiranje koda
+- **0,3-0,5**: Uravnoteženi odgovori sa malo kreativnosti, dobro za opšte razvojne zadatke
+- **0,6-1,0**: kreativniji i raznovrsniji odgovori, korisni za razmišljanje i istraživanje
+
+```json title="sorycode.json"
+{
+  "mode": {
+    "analyze": {
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/analysis.txt}"
+    },
+    "build": {
+      "temperature": 0.3
+    },
+    "brainstorm": {
+      "temperature": 0.7,
+      "prompt": "{file:./prompts/creative.txt}"
+    }
+  }
+}
+```
+
+Ako temperatura nije navedena, sorycode koristi podrazumijevane postavke specifične za model (obično 0 za većinu modela i 0.55 za Qwen modele).
+
+### Upit
+
+Navedite prilagođenu sistemsku datoteku prompta za ovaj način rada s konfiguracijom `prompt`. Datoteka s promptom treba da sadrži upute specifične za svrhu načina rada.
+
+```json title="sorycode.json"
+{
+  "mode": {
+    "review": {
+      "prompt": "{file:./prompts/code-review.txt}"
+    }
+  }
+}
+```
+
+Ova putanja je relativna u odnosu na mjesto gdje se nalazi konfiguracijski fajl. Dakle, ovo radi za
+i globalnu konfiguraciju otvorenog koda i konfiguraciju specifične za projekat.
+
+---
+
+### Alati
+
+Kontrolirajte koji su alati dostupni u ovom načinu rada pomoću `tools` konfiguracije. Možete omogućiti ili onemogućiti određene alate tako što ćete ih postaviti na `true` ili `false`.
+
+```json
+{
+  "mode": {
+    "readonly": {
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false,
+        "read": true,
+        "grep": true,
+        "glob": true
+      }
+    }
+  }
+}
+```
+
+Ako nijedan alat nije specificiran, svi alati su omogućeni po defaultu.
+
+#### Dostupni alati
+
+Ovdje su svi alati koji se mogu kontrolirati kroz konfiguraciju načina rada.
+| Alat | Opis
+|----------- | ----------------------- |
+| `bash` | Izvrši naredbe ljuske |
+| `edit` | Izmijenite postojeće datoteke |
+| `write` | Kreirajte nove fajlove |
+| `read` | Pročitajte sadržaj datoteke |
+| `grep` | Pretraži sadržaj datoteke |
+| `glob` | Pronađite datoteke po uzorku |
+| `list` | Lista sadržaja direktorija |
+| `patch` | Primijenite zakrpe na datoteke |
+| `todowrite` | Upravljanje listama zadataka |
+| `todoread` | Pročitajte liste obaveza |
+| `webfetch` | Dohvati web sadržaj |
+
+---
+
+## Prilagođeni načini rada
+
+Možete kreirati vlastite prilagođene modove tako što ćete ih dodati u konfiguraciju. Evo primjera koji koriste oba pristupa:
+
+### Korištenje JSON konfiguracije
+
+```json title="sorycode.json" {4-14}
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mode": {
+    "docs": {
+      "prompt": "{file:./prompts/documentation.txt}",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": false,
+        "read": true,
+        "grep": true,
+        "glob": true
+      }
+    }
+  }
+}
+```
+
+### Korištenje markdown fajlova
+
+Kreirajte fajlove načina u `.sorycode/modes/` za specifične načine rada ili `~/.config/sorycode/modes/` za globalne načine:
+
+```markdown title=".sorycode/modes/debug.md"
+---
+temperature: 0.1
+tools:
+  bash: true
+  read: true
+  grep: true
+  write: false
+  edit: false
+---
+
+You are in debug mode. Your primary goal is to help investigate and diagnose issues.
+
+Focus on:
+
+- Understanding the problem through careful analysis
+- Using bash commands to inspect system state
+- Reading relevant files and logs
+- Searching for patterns and anomalies
+- Providing clear explanations of findings
+
+Do not make any changes to files. Only investigate and report.
+```
+
+```markdown title="~/.config/sorycode/modes/refactor.md"
+---
+model: anthropic/claude-sonnet-4-20250514
+temperature: 0.2
+tools:
+  edit: true
+  read: true
+  grep: true
+  glob: true
+---
+
+You are in refactoring mode. Focus on improving code quality without changing functionality.
+
+Priorities:
+
+- Improve code readability and maintainability
+- Apply consistent naming conventions
+- Reduce code duplication
+- Optimize performance where appropriate
+- Ensure all tests continue to pass
+```
+
+---
+
+### Slučajevi upotrebe
+
+Evo nekoliko uobičajenih slučajeva upotrebe za različite načine rada.
+
+- **Build mode**: Potpuni razvojni rad sa svim omogućenim alatima
+- **Plan mode**: Analiza i planiranje bez izmjena
+- **Review mode**: Pregled koda sa pristupom samo za čitanje plus alati za dokumentaciju
+- **Debug mode**: Fokusiran na istragu sa omogućenim bash i alatima za čitanje
+- **Docs mode**: Pisanje dokumentacije sa operacijama datoteka, ali bez sistemskih naredbi
+  Možda ćete također otkriti da su različiti modeli dobri za različite slučajeve upotrebe.

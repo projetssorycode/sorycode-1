@@ -1,0 +1,599 @@
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+SoryCode CLI starter som standard [TUI](/docs/tui), når den kører uden nogen argumenter.
+
+```bash
+sorycode
+```
+
+Men den accepterer også kommandoer som dokumenteret på denne side. Dette giver dig mulighed for at interagere med SoryCode programmatisk.
+
+```bash
+sorycode run "Explain how closures work in JavaScript"
+```
+
+---
+
+### tui
+
+Start SoryCode terminalbrugergrænsefladen.
+
+```bash
+sorycode [project]
+```
+
+#### Flag
+
+| Flag         | Kort | Beskrivelse                                                                  |
+| ------------ | ---- | ---------------------------------------------------------------------------- |
+| `--continue` | `-c` | Fortsæt sidste session                                                       |
+| `--session`  | `-s` | Sessions-id for at fortsætte                                                 |
+| `--fork`     |      | Forgren sessionen ved fortsættelse (brug med `--continue` eller `--session`) |
+| `--prompt`   |      | Spørg om at bruge                                                            |
+| `--model`    | `-m` | Model til brug i form af provider/model                                      |
+| `--agent`    |      | Agent hos bruge                                                              |
+| `--port`     |      | Port at lytte på                                                             |
+| `--hostname` |      | Værtsnavn at lytte på                                                        |
+
+---
+
+## Kommandoer
+
+SoryCode CLI har også følgende kommandoer.
+
+---
+
+### agent
+
+Administrer agenter i SoryCode.
+
+```bash
+sorycode agent [command]
+```
+
+---
+
+### attach
+
+Tilslut en terminal til en allerede kørende SoryCode backend-server startet via `serve` eller `web` kommandoer.
+
+```bash
+sorycode attach [url]
+```
+
+Dette gør det muligt at bruge TUI med en ekstern SoryCode backend. For eksempel:
+
+```bash
+# Start the backend server for web/mobile access
+sorycode web --port 4096 --hostname 0.0.0.0
+
+# In another terminal, attach the TUI to the running backend
+sorycode attach http://10.20.30.40:4096
+```
+
+#### Flag
+
+| Flag        | Kort | Beskrivelse                      |
+| ----------- | ---- | -------------------------------- |
+| `--dir`     |      | Arbejdsmappe til at starte TUI i |
+| `--session` | `-s` | Sessions-id for at fortsætte     |
+
+---
+
+#### create
+
+Opret en ny agent med brugerdefineret konfiguration.
+
+```bash
+sorycode agent create
+```
+
+Denne kommando vil guide dig gennem oprettelse af en ny agent med en brugerdefineret systemprompt og værktøjskonfiguration.
+
+---
+
+#### list
+
+Liste over alle tilgængelige agenter.
+
+```bash
+sorycode agent list
+```
+
+---
+
+### auth
+
+Kommando til at administrere legitimationsoplysninger og login for udbydere.
+
+```bash
+sorycode auth [command]
+```
+
+---
+
+#### login
+
+SoryCode drives af udbyderlisten på [Models.dev](https://models.dev), så du kan bruge `sorycode auth login` til at konfigurere API-nøgler for enhver udbyder, du vil bruge. Dette er gemt i `~/.local/share/sorycode/auth.json`.
+
+```bash
+sorycode auth login
+```
+
+Når SoryCode starter op, indlæser den udbyderne fra legitimationsfilen. Og hvis der er nogen nøgler defineret i dine miljøer eller en `.env` fil i dit projekt.
+
+---
+
+#### list
+
+Viser alle de godkendte udbydere som gemt i legitimationsfilen.
+
+```bash
+sorycode auth list
+```
+
+Eller den korte version.
+
+```bash
+sorycode auth ls
+```
+
+---
+
+#### logout
+
+Logger dig ud af en udbyder ved at rydde den fra legitimationsfilen.
+
+```bash
+sorycode auth logout
+```
+
+---
+
+### github
+
+Administrator GitHub-agenten til lagerautomatisering.
+
+```bash
+sorycode github [command]
+```
+
+---
+
+#### install
+
+Installatør GitHub-agenten i dit lager.
+
+```bash
+sorycode github install
+```
+
+Dette opsætter det nødvendige GitHub Actions workflow og guider dig gennem konfigurationsprocessen. [Learn more](/docs/github).
+
+---
+
+#### run
+
+Kør GitHub-agenten. Dette bruges typisk i GitHub Actions.
+
+```bash
+sorycode github run
+```
+
+##### Flag
+
+| Flag      | Beskrivelse                                    |
+| --------- | ---------------------------------------------- |
+| `--event` | GitHub mock begivenhed for at køre agenten for |
+| `--token` | GitHub personlig adgangstoken                  |
+
+---
+
+### mcp
+
+Administrator Model Context Protocol-servere.
+
+```bash
+sorycode mcp [command]
+```
+
+---
+
+#### add
+
+Tilføj en MCP-server til din konfiguration.
+
+```bash
+sorycode mcp add
+```
+
+Denne kommando vil guide dig gennem tilføjelse af enten en lokal eller ekstern MCP-server.
+
+---
+
+#### list
+
+Liste over alle konfigurerede MCP-servere og deres forbindelsesstatus.
+
+```bash
+sorycode mcp list
+```
+
+Eller brug den korte version.
+
+```bash
+sorycode mcp ls
+```
+
+---
+
+#### auth
+
+Godkendt med en OAuth-aktiveret MCP-server.
+
+```bash
+sorycode mcp auth [name]
+```
+
+Hvis du ikke angiver et servernavn, bliver du bedt om at vælge blandt tilgængelige OAuth-kompatible servere.
+
+Du kan også angive OAuth-kompatible servere og deres godkendelsesstatus.
+
+```bash
+sorycode mcp auth list
+```
+
+Eller brug den korte version.
+
+```bash
+sorycode mcp auth ls
+```
+
+---
+
+#### logout
+
+Fjern OAuth-legitimationsoplysninger for en MCP-server.
+
+```bash
+sorycode mcp logout [name]
+```
+
+---
+
+#### debug
+
+Fejlfinding af OAuth-forbindelsesproblemer for en MCP-server.
+
+```bash
+sorycode mcp debug <name>
+```
+
+---
+
+### models
+
+Liste over alle tilgængelige modeller fra konfigurerede udbydere.
+
+```bash
+sorycode models [provider]
+```
+
+Denne kommando viser alle tilgængelige modeller på tværs af dine konfigurerede udbydere i formatet `provider/model`.
+
+Dette er nyttigt til at finde ud af det nøjagtige modelnavn, der skal bruges i [your config](/docs/config/).
+
+Du kan eventuelt videregive et udbyder-id for at filtrere modeller efter den udbyder.
+
+```bash
+sorycode models anthropic
+```
+
+#### Flag
+
+| Flag        | Beskrivelse                                                             |
+| ----------- | ----------------------------------------------------------------------- |
+| `--refresh` | Opdater modelcachen fra models.dev                                      |
+| `--verbose` | Brug mere detaljeret modeloutput (inkluderer metadata som omkostninger) |
+
+Brug flaget `--refresh` til at opdatere den cachelagrede modelliste. Dette er nyttigt, når nye modeller er blevet tilføjet til en udbyder, og du vil se dem i SoryCode.
+
+```bash
+sorycode models --refresh
+```
+
+---
+
+### run
+
+Kør sorycode i ikke-interaktiv tilstand ved at sende en prompt direkte.
+
+```bash
+sorycode run [message..]
+```
+
+Dette er nyttigt til scripting, automatisering, eller når du vil have et hurtigt svar uden at starte hele TUI. F.eks.
+
+```bash "sorycode run"
+sorycode run Explain the use of context in Go
+```
+
+Du kan også vedhæfte til en kørende `sorycode serve`-instans for at undgå MCP serverens kolde opstartstider ved hver kørsel:
+
+```bash
+# Start a headless server in one terminal
+sorycode serve
+
+# In another terminal, run commands that attach to it
+sorycode run --attach http://localhost:4096 "Explain async/await in JavaScript"
+```
+
+#### Flag
+
+| Flag         | Kort | Beskrivelse                                                                         |
+| ------------ | ---- | ----------------------------------------------------------------------------------- |
+| `--command`  |      | Kommandoen til at køre, brug besked til args                                        |
+| `--continue` | `-c` | Fortsæt sidste session                                                              |
+| `--session`  | `-s` | Sessions-id for at fortsætte                                                        |
+| `--fork`     |      | Forgren sessionen ved fortsættelse (brug med `--continue` eller `--session`)        |
+| `--share`    |      | Del sessionen                                                                       |
+| `--model`    | `-m` | Model til brug i form af provider/model                                             |
+| `--agent`    |      | Agent til brug                                                                      |
+| `--file`     | `-f` | Fil(er), der skal vedhæftes til meddelelsen                                         |
+| `--format`   |      | Format: standard (formateret) eller json (rå JSON hændelser)                        |
+| `--title`    |      | Titel for sessionen (bruger trunkeret prompt, hvis der ikke er angivet nogen værdi) |
+| `--attach`   |      | Tilslut til en kørende sorycode-server (f.eks. http://localhost:4096)               |
+| `--port`     |      | Port til den lokale server (standard til vilkårlig port)                            |
+
+---
+
+### serve
+
+Start en hovedløs SoryCode-server til API-adgang. Tjek [server docs](/docs/server) for den fulde HTTP-grænseflade.
+
+```bash
+sorycode serve
+```
+
+Dette starter en HTTP-server, der giver API-adgang til sorycode-funktionalitet uden TUI-grænsefladen. Indstil `SORYCODE_SERVER_PASSWORD` for at aktivere HTTP grundlæggende godkendelse (brugernavn er standard til `sorycode`).
+
+#### Flag
+
+| Flag         | Beskrivelse                                      |
+| ------------ | ------------------------------------------------ |
+| `--port`     | Port at lytte på                                 |
+| `--hostname` | Værtsnavn at lytte på                            |
+| `--mdns`     | Aktiver mDNS-opdagelse                           |
+| `--cors`     | Yderligere browseroprindelse til at tillade CORS |
+
+---
+
+### session
+
+Administrator SoryCode sessionsholder.
+
+```bash
+sorycode session [command]
+```
+
+---
+
+#### list
+
+Liste over alle SoryCode sessioner.
+
+```bash
+sorycode session list
+```
+
+##### Flag
+
+| Flag          | Kort | Beskrivelse                            |
+| ------------- | ---- | -------------------------------------- |
+| `--max-count` | `-n` | Begræns til N seneste sessioner        |
+| `--format`    |      | Outputformat: tabel eller json (tabel) |
+
+---
+
+### stats
+
+Vis tokenbrug og omkostningsstatistikker for dine SoryCode-sessioner.
+
+```bash
+sorycode stats
+```
+
+#### Flag
+
+| Flag        | Beskrivelse                                                                 |
+| ----------- | --------------------------------------------------------------------------- |
+| `--days`    | Vis statistik for de sidste N dage (hele tiden)                             |
+| `--tools`   | Antal værktøjer, der skal vises (alle)                                      |
+| `--models`  | Vis modelbrugsopdeling (skjult som standard). Send et tal for at vise top N |
+| `--project` | Filtre efter projekt (alle projekter, tom streng: nuværende projekt)        |
+
+---
+
+### export
+
+Eksporter sessionsdata som JSON.
+
+```bash
+sorycode export [sessionID]
+```
+
+Hvis du ikke angiver et sessions-id, bliver du bedt om at vælge mellem tilgængelige sessioner.
+
+---
+
+### import
+
+Importer sessionsdata fra en JSON fil eller SoryCode del URL.
+
+```bash
+sorycode import <file>
+```
+
+Du kan importere fra en lokal fil eller en SoryCode share URL.
+
+```bash
+sorycode import session.json
+sorycode import https://opncd.ai/s/abc123
+```
+
+---
+
+### web
+
+Start en hovedløs SoryCode-server med en webgrænseflade.
+
+```bash
+sorycode web
+```
+
+Dette starter en HTTP-server og åbner en webbrowser for at få adgang til SoryCode via en webgrænseflade. Indstil `SORYCODE_SERVER_PASSWORD` for at aktivere HTTP grundlæggende godkendelse (brugernavn er standard til `sorycode`).
+
+#### Flag
+
+| Flag         | Beskrivelse                                      |
+| ------------ | ------------------------------------------------ |
+| `--port`     | Port at lytte på                                 |
+| `--hostname` | Værtsnavn at lytte på                            |
+| `--mdns`     | Aktiver mDNS-opdagelse                           |
+| `--cors`     | Yderligere browseroprindelse til at tillade CORS |
+
+---
+
+### acp
+
+Start en ACP-server (Agent Client Protocol).
+
+```bash
+sorycode acp
+```
+
+Denne kommando starter en ACP-server, der kommunikerer via stdin/stdout ved hjælp af nd-JSON.
+
+#### Flag
+
+| Flag         | Beskrivelse           |
+| ------------ | --------------------- |
+| `--cwd`      | Arbejdsmappe          |
+| `--port`     | Port at lytte på      |
+| `--hostname` | Værtsnavn at lytte på |
+
+---
+
+### uninstall
+
+Afinstaller SoryCode og fjern alle relaterede filer.
+
+```bash
+sorycode uninstall
+```
+
+#### Flag
+
+| Flag            | Kort | Beskrivelse                                      |
+| --------------- | ---- | ------------------------------------------------ |
+| `--keep-config` | `-c` | Se konfigurationsfiler                           |
+| `--keep-data`   | `-d` | Gem sessionsdata og snapshots                    |
+| `--dry-run`     |      | Vis, hvad der ville blive fjernet uden at fjerne |
+| `--force`       | `-f` | Spring bekræftelsesspørgsmål over                |
+
+---
+
+### upgrade
+
+Opdaterer SoryCode til den nyeste version eller en specifik version.
+
+```bash
+sorycode upgrade [target]
+```
+
+For at opgradere til den nyeste version.
+
+```bash
+sorycode upgrade
+```
+
+For at opgradere til en bestemt version.
+
+```bash
+sorycode upgrade v0.1.48
+```
+
+#### upgrade
+
+| Flag       | Kort | Beskrivelse                                                      |
+| ---------- | ---- | ---------------------------------------------------------------- |
+| `--method` | `-m` | Installationsmetoden, der blev brugt; curl, npm, pnpm, bun, brew |
+
+---
+
+## Globale flag
+
+sorycode CLI tager følgende globale flag.
+
+| Flag           | Kort | Beskrivelse                          |
+| -------------- | ---- | ------------------------------------ |
+| `--help`       | `-h` | Vis hjælp                            |
+| `--version`    | `-v` | Udskriftsversionsnummer              |
+| `--print-logs` |      | Udskriv logfiler til stderr          |
+| `--log-level`  |      | Logniveau (DEBUG, INFO, WARN, ERROR) |
+
+---
+
+## Miljøvariabler
+
+SoryCode kan konfigureres ved hjælp af miljøvariabler.
+
+| Variabel                              | Skriv   | Beskrivelse                                                           |
+| ------------------------------------- | ------- | --------------------------------------------------------------------- |
+| `SORYCODE_AUTO_SHARE`                 | boolean | Del automatisk session                                                |
+| `SORYCODE_GIT_BASH_PATH`              | string  | Sti til Git Bash eksekverbar på Windows                               |
+| `SORYCODE_CONFIG`                     | string  | Sti til konfigurationsfil                                             |
+| `SORYCODE_TUI_CONFIG`                 | string  | Sti til TUI-konfigurationsfil                                         |
+| `SORYCODE_CONFIG_DIR`                 | string  | Sti til konfigurationsmappe                                           |
+| `SORYCODE_CONFIG_CONTENT`             | string  | Indbygget json-konfigurationsindhold                                  |
+| `SORYCODE_DISABLE_AUTOUPDATE`         | boolean | Deaktiver automatisk opdateringskontrol                               |
+| `SORYCODE_DISABLE_PRUNE`              | boolean | Deaktiver beskæring af gamle data                                     |
+| `SORYCODE_DISABLE_TERMINAL_TITLE`     | boolean | Deaktiver automatisk opdatering af terminaltitel                      |
+| `SORYCODE_PERMISSION`                 | string  | Indbygget json-tilladelseskonfiguration                               |
+| `SORYCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Deaktiver standard plugins                                            |
+| `SORYCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Deaktiver automatisk LSP-serverdownloads                              |
+| `SORYCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Aktive eksperimentelle modeller                                       |
+| `SORYCODE_DISABLE_AUTOCOMPACT`        | boolean | Deaktiver automatisk kontekstkomprimering                             |
+| `SORYCODE_DISABLE_CLAUDE_CODE`        | boolean | Deaktiver læsning fra `.claude` (prompt + færdigheder)                |
+| `SORYCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Deaktiver læsning `~/.claude/CLAUDE.md`                               |
+| `SORYCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Deaktiver indlæsning af `.claude/skills`                              |
+| `SORYCODE_DISABLE_MODELS_FETCH`       | boolean | Deaktivering af modeller fra eksterne kilder                          |
+| `SORYCODE_FAKE_VCS`                   | string  | Falsk VCS-udbyder til testformål                                      |
+| `SORYCODE_DISABLE_FILETIME_CHECK`     | boolean | Deaktiver filtidskontrol for optimering                               |
+| `SORYCODE_CLIENT`                     | string  | Klient-id (standard til `cli`)                                        |
+| `SORYCODE_ENABLE_EXA`                 | boolean | Aktiver Exa-websøgeværktøjer                                          |
+| `SORYCODE_SERVER_PASSWORD`            | string  | Aktiver grundlæggende godkendelse for `serve`/`web`                   |
+| `SORYCODE_SERVER_USERNAME`            | string  | Tilsidesæt grundlæggende godkendelsesbrugernavn (standard `sorycode`) |
+| `SORYCODE_MODELS_URL`                 | string  | Brugerdefineret URL til hentning af modelkonfiguration                |
+
+---
+
+### Eksperimentel
+
+Disse miljøvariabler muliggør eksperimentelle funktioner, der kan ændres eller fjernes.
+
+| Variabel                                        | Skriv   | Beskrivelse                                |
+| ----------------------------------------------- | ------- | ------------------------------------------ |
+| `SORYCODE_EXPERIMENTAL`                         | boolean | Aktiver alle eksperimentelle funktioner    |
+| `SORYCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Aktiver ikonopdagelse                      |
+| `SORYCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Deaktiver kopi ved valg i TUI              |
+| `SORYCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | nummer  | Standard timeout for bash-kommandoer i ms  |
+| `SORYCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | nummer  | Maks. output-tokens for LLM-svar           |
+| `SORYCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Aktiver filovervågning for hele dir        |
+| `SORYCODE_EXPERIMENTAL_OXFMT`                   | boolean | Aktiver oxfmt formatter                    |
+| `SORYCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Aktive eksperimenter LSP værktøj           |
+| `SORYCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Deaktiver filovervågning                   |
+| `SORYCODE_EXPERIMENTAL_EXA`                     | boolean | Aktive eksperimenter Exa-funktioner        |
+| `SORYCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Aktive forsøg LSP typekontrol              |
+| `SORYCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Aktive eksperimentelle markdown-funktioner |
+| `SORYCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Aktiver plantilstand                       |
